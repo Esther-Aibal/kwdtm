@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.ext.ExtWdtTTaskPersonDao">
+
+
+
+	<select id="getReaders" resultType="com.movitech.mbox.modules.wdt.entity.WdtTTaskPerson">
+        SELECT *,user_id as "user.id" from wdt_t_task_person
+        where task_item_id=#{taskItemId} and del_flag='0' 
+        and type='1' and person_type='0'
+    </select>
+    
+    <select id="getReaderUsers" resultType="com.movitech.mbox.modules.sys.entity.User">
+        SELECT u.id,u.name from wdt_t_task_person  tp
+        left join sys_user u on u.id=tp.user_id
+        where tp.task_item_id=#{taskItemId} and tp.del_flag='0' 
+        and tp.type='1' and tp.person_type='0'
+        and tp.user_id is not null
+    </select>
+	
+	<update id="deletePerson">
+		update wdt_t_task_person set del_flag='1'
+	  	where id in
+        <foreach collection="ids" item="id" index="index"
+            open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+	</update>
+	
+</mapper>

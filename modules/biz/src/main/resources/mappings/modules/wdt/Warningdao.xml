@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WarningDao" >
+  <resultMap id="BaseResultMap" type="com.movitech.mbox.modules.wdt.entity.Warning" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="task_id" property="taskId" jdbcType="VARCHAR" />
+    <result column="days" property="days" jdbcType="INTEGER" />
+    <result column="warning_start_date" property="warningStartDate" jdbcType="DATE" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, task_id, days, warning_start_date, remark, status, create_by, create_date, update_by, 
+    update_date, del_flag
+  </sql>
+  <select id="get" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from wdt_t_warning
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="getBytaskId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from wdt_t_warning
+    where task_id = #{taskId,jdbcType=VARCHAR} and del_flag='0'
+  </select>
+  <update id="delete" parameterType="java.lang.String" >
+    update  wdt_t_warning set del_flag='1'
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="insert" parameterType="com.movitech.mbox.modules.wdt.entity.Warning" >
+    insert into wdt_t_warning (id, task_id, days, 
+      warning_start_date, remark, status, 
+      create_by, create_date, update_by, 
+      update_date, del_flag)
+    values (#{id,jdbcType=VARCHAR}, #{taskId,jdbcType=VARCHAR}, #{days,jdbcType=INTEGER}, 
+      #{warningStartDate,jdbcType=DATE}, #{remark,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
+      #{createBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
+      #{updateDate,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=CHAR})
+  </insert>
+  <update id="update" parameterType="com.movitech.mbox.modules.wdt.entity.Warning" >
+    update wdt_t_warning
+    set task_id = #{taskId,jdbcType=VARCHAR},
+      days = #{days,jdbcType=INTEGER},
+      warning_start_date = #{warningStartDate,jdbcType=DATE},
+      remark = #{remark,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      del_flag = #{delFlag,jdbcType=CHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="getWarningListByUser" resultType="com.movitech.mbox.modules.wdt.entity.Warning">
+     SELECT task.`name` taskName,warn.*   FROM wdt_t_warning warn INNER JOIN wdt_t_task task ON task.`id`=warn.`task_id`
+WHERE task.`del_flag`='0' AND task.`execution_status`='3' AND
+(task.`owner_id`=#{userId} OR  task.`task_create_user`=#{userId})
+     AND  task.name like concat('%',#{taskName},'%')
+  </select>
+</mapper>

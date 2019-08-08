@@ -1,0 +1,279 @@
+.task_detail {
+  width: 100%;
+  min-width: 1024px;
+}
+
+.task_detail .fl{
+	float:left;
+}
+
+.task_detail .task_plan_content{
+	padding-left:65px;
+	word-break: break-all;
+}
+
+.task_detail .task_plan_content>div{
+	margin-bottom:10px;
+}
+
+.task_detail .tab_panel {
+  border: 1px solid #ababab;
+}
+
+.task_detail .panel {
+  margin:20px;
+}
+
+.task_detail .btn-default{
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+}
+
+.task_detail .panel_btn_group{
+  float:right;
+  margin-top:-2px;
+}
+
+.task_detail .panel_btn_group .btn{
+  padding: 0;
+  border: 1px solid #ee7000;
+  color: #fff;
+  height: 23px;
+  line-height: 50%;
+  width: 80px;
+  text-align: center;
+  background: #ee7000;
+  margin-left:15px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.task_detail .panel .col-xs-5 {
+  padding-left: 0
+}
+
+.task_detail .panel-default>.panel-heading {
+  border-bottom: 0;
+  color: #ee7000;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 24px;
+}
+
+
+.task_detail .progress_wrap{
+	width:100%;
+}
+
+.task_detail .progress {
+	height:12px;
+	margin-bottom:0;
+	position:relative;
+	top:2px;
+}
+.task_detail .progress_wrap .progress-bar{
+	background:#3cca74;
+	line-height:12px;
+}
+
+.task_detail .progress_wrap .progress_label{
+	float:left;
+}
+
+.task_detail .asterisk {
+  color: #f00;
+}
+
+.task_detail .table{
+  margin-bottom: 0;
+}
+
+.task_detail .table > tbody > tr > td,
+.task_detail .table > tr > td,
+.task_detail .table > td{
+  border-top: 0;
+  width:33.3%;
+  vertical-align: top;
+}
+
+.task_detail .nav-tabs {
+  border-bottom: 0;
+}
+
+.task_detail .nav-tabs>li{
+	margin-bottom:0;
+}
+
+.task_detail .nav-tabs>li>a {
+  border: none;
+  background: #ccc;
+  font-size: 14px;
+  border-radius:10px 10px 0 0;
+  padding: 5px 23px;
+  color:#333;
+}
+
+.task_detail .nav-tabs>li a:hover {
+  color:#fff;
+  background: #EE7000;
+  border:none;
+}
+
+.task_detail .nav-tabs>li.active>a {
+  color:#fff;
+  background: #EE7000;
+  border:none;
+}
+
+
+.task_detail .progress_content {
+  border: 1px solid #BFBFBF;
+}
+
+.task_detail .progress_content p {
+	margin:5px;
+}
+
+.task_detail .content_header{
+	text-align:right;
+	/*padding: 6px 30px 0 0;*/
+}
+
+.task_detail .content_header .btn{
+	height:26px;
+	width:110px;
+	line-height:50%;
+	padding:0;
+	background:#ee7000;
+	color:#fff;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.task_detail .progress_item {
+	border-bottom: 1px dashed #999;
+	margin: 0 1%;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.task_detail .progress_item:last-child {
+	border-bottom: 0;
+}
+
+.task_detail .progress_item .item_content{
+	padding-left:15px;
+	padding-right: 15px;
+}
+
+
+.task_detail .progress_item .staff_info span{
+	padding:0 10px;
+	position:relative;
+	top:-1px;
+}
+.task_detail .progress_item .staff_info span.time{
+	color:#7f96a3;
+}
+
+.task_detail .progress_item .staff_info{
+	position:relative;
+	color:#ee7000;
+}
+
+.task_detail .progress_item .staff_info .btn_group{
+	position:absolute;
+	right:20px;
+	top:0;
+}
+
+.task_detail .progress_item .staff_info .btn_group a{
+	color:#ee7000;
+	margin-left:15px;
+}
+
+.task_detail .progress_item .staff_revert{
+	border:1px solid #ccc;
+	background:#fafafa;
+	border-radius:3px;
+	padding:10px;
+	color:#333;
+	margin-bottom: 10px;
+}
+
+.task_detail .progress_item .staff_revert .staff_name{
+	color:#ee7000;
+	cursor: pointer;
+}
+
+.task_detail .progress_item .staff_revert .revert_time{
+	float:right;
+}
+
+.layui-layer-title{
+	background-color:#ee7000 !important;
+	color:#fff !important;
+}
+
+.layui-layer-btn .layui-layer-btn0{
+	background-color:#EE7701 !important;
+	border-color:#EE7701 !important;
+	color:#fff !important;
+}
+
+.layui-layer-btn .layui-layer-btn1{
+	background-color:#999 !important;
+	border-color:#999 !important;
+	color:#fff !important;
+}
+
+.task_detail .revert_box{
+	margin:10px 0;
+}
+
+.footer_btn_box {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.footer_btn_box .btn{
+	margin-bottom:50px;
+}
+
+#revert_container{
+	heigth:80px;
+}
+
+.task_detail .submit_revert_btn{
+	margin-top:5px;
+	text-align:right;
+}
+.task_detail table.log-table {
+	margin-bottom: 20px !important;
+}
+.task_detail table.log-table td{
+	width: auto !important;
+}
+
+.load-prev,
+.load-more{
+	width: 100%;
+	text-align: center;
+	padding: 15px;
+	cursor: pointer;
+	background: #D2D2D2;
+}
+.load-prev:hover,
+.load-more:hover{
+	color: #ee7000;
+}
+.taskDesc{
+	word-break: break-all;
+}
+.taskDesc img{
+	width: auto;
+	max-width: 100%!important;
+	height: auto !important;
+	float: none !important;
+}
+

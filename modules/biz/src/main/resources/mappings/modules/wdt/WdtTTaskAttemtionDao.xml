@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskAttemtionDao">
+    
+    <sql id="wdtTTaskAttemtionColumns">
+        a.id AS "id",
+        a.task_id AS "taskId",
+        a.user_id AS "user.id",
+        a.org_id AS "orgId",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        u3.name AS "user.name"
+    </sql>
+    
+    <sql id="wdtTTaskAttemtionJoins">
+        LEFT JOIN sys_user u3 ON u3.id = a.user_id
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskAttemtion">
+        SELECT 
+            <include refid="wdtTTaskAttemtionColumns"/>
+        FROM wdt_t_task_attemtion a
+        <include refid="wdtTTaskAttemtionJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskAttemtion">
+        SELECT 
+            <include refid="wdtTTaskAttemtionColumns"/>
+        FROM wdt_t_task_attemtion a
+        <include refid="wdtTTaskAttemtionJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskAttemtion">
+        SELECT 
+            <include refid="wdtTTaskAttemtionColumns"/>
+        FROM wdt_t_task_attemtion a
+        <include refid="wdtTTaskAttemtionJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_attemtion(
+            id,
+            task_id,
+            user_id,
+            org_id,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag
+        ) VALUES (
+            #{id},
+            #{taskId},
+            #{user.id},
+            #{orgId},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_attemtion SET     
+            task_id = #{taskId},
+            user_id = #{user.id},
+            org_id = #{orgId},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_attemtion SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    
+    <select id="getFocusedTaskByTaskIdAndUserId" resultType="WdtTTaskAttemtion">
+        SELECT 
+            <include refid="wdtTTaskAttemtionColumns"/>
+        FROM wdt_t_task_attemtion a
+        <include refid="wdtTTaskAttemtionJoins"/>
+        <where>
+        	a.task_id = #{taskId}
+        	AND a.user_id = #{user.id}
+            AND a.del_flag = '0'
+        </where>        
+    </select>
+    <update id="cancelAttentionTask">
+        delete from wdt_t_task_attemtion  
+        WHERE task_id = #{taskId} and user_id=#{user.id}
+    </update>
+    
+</mapper>

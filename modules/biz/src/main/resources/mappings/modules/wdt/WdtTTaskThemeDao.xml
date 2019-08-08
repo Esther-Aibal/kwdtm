@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskThemeDao">
+    
+    <sql id="wdtTTaskThemeColumns">
+        a.id AS "id",
+        a.category_id AS "categoryId",
+        a.category_name AS "categoryName",
+        a.parent_category_id AS "parentCategoryId",
+        a.is_relate_project AS "isRelateProject",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        p.id AS "parent.id",
+        p.category_id AS "parent.categoryId",
+        p.category_name AS "parent.categoryName",
+        a.is_total_approve as "isTotalApprove"
+    </sql>
+    
+    <sql id="wdtTTaskThemeJoins">
+        LEFT JOIN wdt_t_task_theme p on p.category_id=a.parent_category_id
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskTheme">
+        SELECT 
+            <include refid="wdtTTaskThemeColumns"/>
+        FROM wdt_t_task_theme a
+        <include refid="wdtTTaskThemeJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskTheme">
+        SELECT 
+            <include refid="wdtTTaskThemeColumns"/>
+        FROM wdt_t_task_theme a
+        <include refid="wdtTTaskThemeJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="parentCategoryId!=null and parentCategoryId !=''">
+                and a.parent_category_id=#{parentCategoryId}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskTheme">
+        SELECT 
+            <include refid="wdtTTaskThemeColumns"/>
+        FROM wdt_t_task_theme a
+        <include refid="wdtTTaskThemeJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_theme(
+            id,
+            category_id,
+            category_name,
+            parent_category_id,
+            is_relate_project,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag,
+            is_total_approve
+        ) VALUES (
+            #{id},
+            #{categoryId},
+            #{categoryName},
+            #{parentCategoryId},
+            #{isRelateProject},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag},
+            #{isTotalApprove}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_theme SET     
+            category_id = #{categoryId},
+            category_name = #{categoryName},
+            parent_category_id = #{parentCategoryId},
+            is_relate_project = #{isRelateProject},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate},
+            is_total_approve = #{isTotalApprove}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_theme SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    <select id="findAllUsedTheme" resultType="com.movitech.mbox.modules.sys.utils.TreeNode">
+        SELECT
+            a.category_id as id,a.category_name as name,a.parent_category_id as parentId ,a.is_relate_project AS "isRelateProject"
+        FROM wdt_t_task_theme a
+        WHERE a.del_flag ='0' 
+    </select>
+    <select id="checkInUsedCount" resultType="integer" parameterType="string">
+        SELECT
+            count(a.id)
+        FROM wdt_t_task a
+        WHERE a.theme_id =#{categoryId} and a.del_flag='0'
+    </select>  
+        <select id="getThemeByTaskId" resultType="WdtTTaskTheme">
+        SELECT 
+            <include refid="wdtTTaskThemeColumns"/>
+        FROM wdt_t_task_theme a
+        <include refid="wdtTTaskThemeJoins"/>
+        inner join wdt_t_task t on t.is_templete='0' and t.theme_id=a.id
+        WHERE t.id=#{taskId}
+    </select>
+    
+</mapper>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskTempleteDao">
+    
+    <sql id="wdtTTaskTempleteColumns">
+        a.id AS "id",
+        a.theme_id AS "themeId",
+        a.templete_column AS "templeteColumn",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        a.sort_num 	AS "sortNum"
+    </sql>
+    
+    <sql id="wdtTTaskTempleteJoins">
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskTemplete">
+        SELECT 
+            <include refid="wdtTTaskTempleteColumns"/>
+        FROM wdt_t_task_templete a
+        <include refid="wdtTTaskTempleteJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskTemplete">
+        SELECT 
+            <include refid="wdtTTaskTempleteColumns"/>
+        FROM wdt_t_task_templete a
+        <include refid="wdtTTaskTempleteJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="themeId != null and themeId != ''">
+                AND a.theme_id = #{themeId}
+            </if>
+            <if test="delFlag != null and delFlag != ''">
+                AND a.del_flag = #{delFlag}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.sort_num asc
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskTemplete">
+        SELECT 
+            <include refid="wdtTTaskTempleteColumns"/>
+        FROM wdt_t_task_templete a
+        <include refid="wdtTTaskTempleteJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.sort_num asc
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_templete(
+            id,
+            theme_id,
+            templete_column,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag,
+            sort_num
+        ) VALUES (
+            #{id},
+            #{themeId},
+            #{templeteColumn},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag},
+            #{sortNum}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_templete SET     
+            theme_id = #{themeId},
+            templete_column = #{templeteColumn},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate},
+            sort_num = #{sortNum}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_templete SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    <select id="getTempletesAndContent" resultType="WdtTTaskTemplete" parameterType="string">
+        SELECT 
+            <include refid="wdtTTaskTempleteColumns"/>
+            <if test="taskId != null and taskId !=''">
+        		,c.content as "content"
+        	</if>
+        FROM wdt_t_task_templete a
+        <if test="taskId != null and taskId !=''">
+        	left join wdt_t_task_content c on c.templete_id=a.id and c.task_id=#{taskId}
+        </if>
+        <where>
+            a.del_flag ='0'
+        </where>
+        order by a.sort_num asc
+    </select>
+    <select id="getCountAboutSort" resultType="integer" parameterType="WdtTTaskTemplete">
+        SELECT 
+            COUNT(a.id)
+        FROM wdt_t_task_templete a
+        <where>
+            a.del_flag ='0' and a.theme_id=#{themeId} AND a.sort_num =#{sortNum}
+        </where>
+    </select>
+    
+</mapper>

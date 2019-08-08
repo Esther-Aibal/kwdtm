@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.ext.ExtWdtTTaskReponseDao">
+	<sql id="extWdtTTaskReponseColumns">
+       	 DISTINCT(a.id) AS "id",
+        a.coments_id AS "comentsId",
+        a.user_id AS "user.id",
+        a.content AS "content",
+        a.parent_id AS "parentId",
+        a.by_user_id AS "byUserId",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        u5.name AS "user.name",
+        t.name AS "taskName",
+        t.id AS "taskId",
+        c.type as "type",
+        c.task_item_id as "taskItemId",
+        a.content_char as "contentChar"
+    </sql>
+    
+    <sql id="extWdtTTaskReponseJoins">
+    	LEFT JOIN wdt_t_task_comments c ON c.id = a.coments_id
+    	LEFT JOIN wdt_t_task t ON t.id = c.task_id
+        LEFT JOIN sys_user u5 ON u5.id = a.user_id
+        LEFT JOIN wdt_t_task_person p ON p.task_id = t.id
+    </sql>
+
+	<select id="getResponseTOP10" resultType="com.movitech.mbox.modules.wdt.entity.ext.ExtWdtTTaskReponse">
+        SELECT 
+            <include refid="extWdtTTaskReponseColumns"/>
+        FROM wdt_t_task_reponse a
+        <include refid="extWdtTTaskReponseJoins"/>
+        WHERE
+            a.del_flag = '0'
+            AND c.type = '0'
+            AND p.user_id = #{userId}
+        ORDER BY
+        	a.update_date DESC
+        LIMIT 10
+    </select>
+
+</mapper>

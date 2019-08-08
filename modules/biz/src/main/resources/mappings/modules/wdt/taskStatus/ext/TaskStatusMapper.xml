@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.taskStatus.dao.ext.TaskStatusMapper">
+
+	<update id="deleteTask">
+		update wdt_t_task set del_flag='1' ,update_date=NOW()
+		where id=#{taskId} and execution_status='0'
+	</update>
+	
+	<update id="upTaskStatus">
+		update wdt_t_task set execution_status=#{status} ,update_date=NOW()
+		where id=#{taskId}
+	</update>
+	
+	<update id="handover">
+		update wdt_t_task set execution_status='1' ,update_date=NOW(),owner_id=#{userId}
+		where id=#{taskId}
+	</update>
+	
+	<select id="getPTask" resultType="com.movitech.mbox.modules.wdt.entity.WdtTTask">
+		SELECT t.id,t.name,t.owner_id as themeId
+		from wdt_t_task_relation tr
+		LEFT JOIN wdt_t_task t on tr.task_id=t.id
+		where tr.relation_task_id=#{taskId}
+		LIMIT 0,1
+	</select>
+	
+	<select id="getSTasks" resultType="com.movitech.mbox.modules.wdt.entity.WdtTTask">
+		SELECT t.* 
+		from wdt_t_task_relation tr
+		LEFT JOIN wdt_t_task t on tr.relation_task_id=t.id 
+		where tr.task_id=#{taskId}
+	</select>
+
+	<select id="getTaskPerson" resultType="string">
+		SELECT DISTINCT user_id from wdt_t_task_person
+		where person_type=#{type} and task_id=#{taskId}
+	</select>
+	
+	<select id="list" resultType="com.movitech.mbox.modules.wdt.taskStatus.entity.TaskOa">
+	SELECT a.*,u.name from (
+		SELECT 1 as type,creater_id,create_date as createDate,`status`,process_Id as processId,creater_id as userId
+		from wdt_t_task_banjie_log where task_id=#{taskId} and del_flag='0' and process_Id is not null
+		UNION 
+		SELECT 3 as type,creater_id,create_date,`status`,process_Id as processId,creater_id as userId
+		from wdt_t_task_cancel where task_id=#{taskId} and del_flag='0' and process_Id is not null
+		UNION 
+		SELECT 0 as type,creater_id,create_date,`status`,process_Id as processId,creater_id as userId
+		from wdt_t_task_extension where task_id=#{taskId} and del_flag='0' and process_Id is not null
+		UNION 
+		SELECT 2 as type,creater_id,create_date,`status`,process_Id as processId,creater_id as userId
+		from wdt_t_task_pause where task_id=#{taskId} and del_flag='0' and process_Id is not null
+		)a 
+		left join sys_user u on a.creater_id=u.id
+		ORDER BY a.createDate desc 
+	</select>
+	
+	<select id="getMessage" resultType="com.movitech.mbox.modules.wdt.entity.Message">
+		SELECT * from wdt_t_task_message where task_id=#{taskId} and message_type='4' and del_flag='0' limit 0,1
+	</select>
+	<update id="recalling">
+		update wdt_t_task set execution_status=#{executionStatus} ,update_date=NOW(),owner_id=#{userId}
+		where id=#{taskId}
+	</update>
+
+</mapper>

@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.MessageDao" >
+  <resultMap id="BaseResultMap" type="com.movitech.mbox.modules.wdt.entity.Message" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="task_id" property="taskId" jdbcType="VARCHAR" />
+    <result column="task_item_id" property="taskItemId" jdbcType="VARCHAR" />
+    <result column="reciver_id" property="reciverId" jdbcType="VARCHAR" />
+    <result column="message_type" property="messageType" jdbcType="VARCHAR" />
+    <result column="is_read" property="isRead" jdbcType="VARCHAR" />
+    <result column="is_from_system" property="isFromSystem" jdbcType="VARCHAR" />
+    <result column="source_id" property="sourceId" jdbcType="VARCHAR" />
+    <result column="sender_id" property="senderId" jdbcType="VARCHAR" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+    <result column="pin_id" property="pinId" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, type, task_id, task_item_id, reciver_id, message_type, is_read, is_from_system, source_id,
+    sender_id, create_by, create_date, update_by, update_date, del_flag ,pin_id,content
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from wdt_t_task_message
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from wdt_t_task_message
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.movitech.mbox.modules.wdt.entity.Message" >
+    insert into wdt_t_task_message (id, type, task_id,
+      task_item_id, reciver_id, message_type,
+      is_read, is_from_system, source_id, 
+      sender_id, create_by, create_date, 
+      update_by, update_date, del_flag,pin_id,content
+      )
+    values (#{id,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{taskId,jdbcType=VARCHAR},
+      #{taskItemId,jdbcType=VARCHAR}, #{reciverId,jdbcType=VARCHAR}, #{messageType,jdbcType=VARCHAR},
+      #{isRead,jdbcType=VARCHAR}, #{isFromSystem,jdbcType=VARCHAR}, #{sourceId,jdbcType=CHAR}, 
+      #{senderId,jdbcType=VARCHAR}, #{createBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, 
+      #{updateBy,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=CHAR},#{pinId,jdbcType=VARCHAR},
+      #{content,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.movitech.mbox.modules.wdt.entity.Message" >
+    insert into wdt_t_task_message
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="taskId != null" >
+        task_id,
+      </if>
+      <if test="taskItemId != null" >
+        task_item_id,
+      </if>
+      <if test="reciverId != null" >
+        reciver_id,
+      </if>
+      <if test="messageType != null" >
+        message_type,
+      </if>
+      <if test="isRead != null" >
+        is_read,
+      </if>
+      <if test="isFromSystem != null" >
+        is_from_system,
+      </if>
+      <if test="sourceId != null" >
+        source_id,
+      </if>
+      <if test="senderId != null" >
+        sender_id,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="delFlag != null" >
+        del_flag,
+      </if>
+      <if test="pinId != null" >
+        pin_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="taskId != null" >
+        #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskItemId != null" >
+        #{taskItemId,jdbcType=VARCHAR},
+      </if>
+      <if test="reciverId != null" >
+        #{reciverId,jdbcType=VARCHAR},
+      </if>
+      <if test="messageType != null" >
+        #{messageType,jdbcType=VARCHAR},
+      </if>
+      <if test="isRead != null" >
+        #{isRead,jdbcType=VARCHAR},
+      </if>
+      <if test="isFromSystem != null" >
+        #{isFromSystem,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceId != null" >
+        #{sourceId,jdbcType=CHAR},
+      </if>
+      <if test="senderId != null" >
+        #{senderId,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null" >
+        #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="pinId != null" >
+        #{pinId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateSelective" parameterType="com.movitech.mbox.modules.wdt.entity.Message" >
+    update wdt_t_task_message
+    <set >
+      <if test="type != null" >
+        type = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="taskId != null" >
+        task_id = #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskItemId != null" >
+        task_item_id = #{taskItemId,jdbcType=VARCHAR},
+      </if>
+      <if test="reciverId != null" >
+        reciver_id = #{reciverId,jdbcType=VARCHAR},
+      </if>
+      <if test="messageType != null" >
+        message_type = #{messageType,jdbcType=VARCHAR},
+      </if>
+      <if test="isRead != null" >
+        is_read = #{isRead,jdbcType=VARCHAR},
+      </if>
+      <if test="isFromSystem != null" >
+        is_from_system = #{isFromSystem,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceId != null" >
+        source_id = #{sourceId,jdbcType=CHAR},
+      </if>
+      <if test="senderId != null" >
+        sender_id = #{senderId,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null" >
+        del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="pinId != null" >
+        pin_id = #{pinId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="update" parameterType="com.movitech.mbox.modules.wdt.entity.Message" >
+    update wdt_t_task_message
+    set type = #{type,jdbcType=VARCHAR},
+      task_id = #{taskId,jdbcType=VARCHAR},
+      task_item_id = #{taskItemId,jdbcType=VARCHAR},
+      reciver_id = #{reciverId,jdbcType=VARCHAR},
+      message_type = #{messageType,jdbcType=VARCHAR},
+      is_read = #{isRead,jdbcType=VARCHAR},
+      is_from_system = #{isFromSystem,jdbcType=VARCHAR},
+      source_id = #{sourceId,jdbcType=CHAR},
+      sender_id = #{senderId,jdbcType=VARCHAR},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      del_flag = #{delFlag,jdbcType=CHAR},
+      pin_id = #{pinId,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="batchInsert" parameterType="com.movitech.mbox.modules.wdt.entity.Message" >
+    insert into wdt_t_task_message (id, type, task_id,
+    task_item_id, reciver_id, message_type,
+    is_read, is_from_system, source_id,
+    sender_id, create_by, create_date,
+    update_by, update_date, del_flag,pin_id,content
+    )
+    values
+    <foreach collection="list" item="item" index="index" separator="," >
+    (
+    #{item.id}, #{item.type}, #{item.taskId},
+    #{item.taskItemId}, #{item.reciverId}, #{item.messageType},
+    #{item.isRead}, #{item.isFromSystem}, #{item.sourceId},
+    #{item.senderId}, #{item.createBy}, #{item.createDate},
+    #{item.updateBy}, #{item.updateDate}, #{item.delFlag},#{item.pinId},#{item.content}
+    )
+    </foreach>
+  </insert>
+  <update id="deleteAll">
+      update wdt_t_task_message SET del_flag ='1'
+      <where>
+        <if test="typelist!=null and typelist.size()>0">
+          and  message_type   IN
+          <foreach collection="typelist" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+          </foreach>
+        </if>
+       <if test="list!=null and list.size()>0">
+         and id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+         #{item}
+        </foreach>
+       </if>
+      </where>
+  </update>
+  <update id="deleteByTypeAndTaskId">
+    update wdt_t_task_message SET del_flag ='1'
+    <where>
+      <if test="type!=null and type!=''">
+        and  message_type =#{type}
+      </if>
+      <if test="taskId!=null and taskId!=''">
+        and task_id=#{taskId}
+      </if>
+    </where>
+  </update>
+    <update id="deleteByTypeAndItemId">
+    update wdt_t_task_message SET del_flag ='1'
+    <where>
+      <if test="type!=null and type!=''">
+        and  message_type =#{type}
+      </if>
+      <if test="itemId!=null and itemId!=''">
+        and task_item_id=#{itemId}
+      </if>
+    </where>
+  </update>
+  
+  <select id="findAllMessageIdByTaskClose" resultType="java.lang.String">
+      SELECT  me.`id` FROM wdt_t_task_message me
+      LEFT JOIN wdt_t_task task ON  me.`task_id`=task.`id`
+      WHERE task.`execution_status` in ('7','8','9','10')
+  </select>
+  <select id="getMessageAmount" resultType="int">
+    SELECT  count(1) FROM wdt_t_task_message me
+    WHERE me.`del_flag`='0' and me.`reciver_id`=#{userId} and me.is_read='0'
+  </select>
+  <select id="getTodaoMessageAmount" resultType="int">
+    SELECT  count(1) FROM wdt_t_task_message me
+    WHERE me.`del_flag`='0' and me.`reciver_id`=#{userId} and me.message_type in('0','2','4')
+  </select>
+  <select id="getTaskMessage" resultType="int">
+    SELECT  count(1) FROM wdt_t_task task
+    WHERE task.`del_flag`='0' and task.`execution_status`='1' AND task.`owner_id`=#{userId}
+  </select>
+  <update id="updateRead" parameterType="string" >
+    update wdt_t_task_message
+    set is_read ='1'
+    where id = #{id}
+  </update>
+  <select id="getTaskItemName" resultType="string">
+     SELECT DISTINCT(item.`item_name`) FROM wdt_t_task_message m
+LEFT JOIN wdt_t_task_item  item ON item.id=m.`task_item_id`
+WHERE m.`del_flag`='0' AND m.`message_type`=#{type} AND m.`task_id`=#{taskId}
+  </select>
+  
+  <select id="getSubmitMessage" resultType="com.movitech.mbox.modules.wdt.entity.Message" parameterType="com.movitech.mbox.modules.wdt.entity.Message" >
+     SELECT <include refid="Base_Column_List" /> FROM wdt_t_task_message 
+WHERE `message_type`=#{messageType} AND `task_id`=#{taskId}
+  </select>
+  <update id="updateUrgeMessage" parameterType="string" >
+    update wdt_t_task_message
+    set is_read ='0',reciver_id=#{reciverId} 
+    where task_id =#{taskId} and message_type  in (1,2) and task_item_id =#{taskItemId} and del_flag='0'
+  </update>
+  <delete id="deleteByPinId" parameterType="java.lang.String" >
+    delete from wdt_t_task_message
+    <where> pin_id in  
+    	<foreach item="item" index="index" collection="pinIds" open="(" separator="," close=")">
+           #{item,jdbcType=VARCHAR}
+        </foreach>
+ 	</where>
+  </delete>
+  <delete id="deleteById" parameterType="java.lang.String" >
+    delete from wdt_t_task_message
+    <where> id = #{id}
+ 	</where>
+  </delete>
+  <select id="get" resultType="com.movitech.mbox.modules.wdt.entity.Message">
+     SELECT <include refid="Base_Column_List" /> FROM wdt_t_task_message 
+	WHERE id=#{id}
+  </select>
+  <update id="updateReadIds">
+    update wdt_t_task_message
+    set is_read ='1'
+    where id in 
+    <foreach collection="ids" item="item" separator="," open="(" close=")">
+     	#{item}
+    </foreach>
+  </update>
+  
+</mapper>

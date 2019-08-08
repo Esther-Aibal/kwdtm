@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.taskStatus.dao.ext.TaskReportMapper">
+
+	<select id="getReportToTal" resultType="com.movitech.mbox.modules.wdt.taskStatus.resp.TaskReportRow">
+		select u.id userId,u.name userName,o.id officeId,o.name officeName from(
+		SELECT  DISTINCT owner_id  from wdt_t_task 
+		where del_flag='0' and execution_status !='0' and execution_status !='1' 
+		<if test="endDay!=null">
+				<![CDATA[ and (infact_completion_time <= #{endDay} or (infact_completion_time is null and end_date <= #{endDay})) ]]>
+		</if>
+		) a
+		join sys_user u on u.id=a.owner_id
+		left join sys_office o on o.id=u.office_id
+		where 1=1 
+		<if test="officeId!=null and officeId != ''">
+		   and o.id=#{officeId}
+		</if>
+	</select>
+	
+	<select id="getReportDetail" resultType="map">
+		SELECT  COUNT(1) count,CASE 
+		        WHEN a.execution_status in ('7','8') then 1
+	            WHEN a.execution_status in ('9','10') then 2
+	            WHEN a.execution_status =3 then 3
+	            WHEN a.execution_status =6 then 4       
+	            ELSE  5 end as status from wdt_t_task a 
+	            left join wdt_t_task_theme tt on tt.id=theme_id 
+				where a.owner_id=#{userId} 
+				<if test="startDay!=null">
+					<!--<![CDATA[ and a.end_date >= #{startDay} ]]>-->
+					and CASE  WHEN   a.execution_status IN ('7','8','9','10') THEN
+					a.infact_completion_time &gt;=#{startDay}
+					ELSE
+					   a.end_date &gt;= #{startDay}
+					END
+				</if>
+				<if test="endDay!=null">
+					and CASE  WHEN   a.execution_status IN ('7','8','9','10') THEN
+					a.infact_completion_time &lt;=#{endDay}
+					ELSE
+					a.end_date &lt;= #{endDay}
+                    END
+				</if>
+				  and  a.del_flag='0' and a.execution_status !='0' and a.execution_status !='1' and a.is_relation_task='1' 
+				  and ((a.is_templete='0' and tt.is_total_approve='0') or a.is_templete='1')
+				GROUP by status
+	</select>
+	
+	
+
+</mapper>

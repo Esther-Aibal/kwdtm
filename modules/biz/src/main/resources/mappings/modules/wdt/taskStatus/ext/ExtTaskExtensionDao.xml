@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.movitech.mbox.modules.wdt.taskStatus.dao.ExtTaskExtensionDao" >
+  
+  <sql id="wdtTTaskExtensionColumns">
+        a.id AS "id",
+        a.type AS "type",
+        a.task_id AS "taskId",
+        a.task_item_id AS "taskItemId",
+        a.old_completion_time AS "oldCompletionTime",
+        a.new_completion_time AS "newCompletionTime",
+        a.content AS "content",
+        a.status AS "status",
+        a.creater_id AS "createrId",
+        a.approver_id AS "approverId",
+        a.approve_time AS "approveTime",
+        a.approve_remark AS "approveRemark",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag"
+    </sql>
+    
+    <sql id="wdtTTaskExtensionJoins">
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskExtension">
+        SELECT 
+            <include refid="wdtTTaskExtensionColumns"/>
+        FROM wdt_t_task_extension a
+        <include refid="wdtTTaskExtensionJoins"/>
+        WHERE a.id = #{id}
+    </select>
+  <select id="getNewBytaskId" parameterType="string" resultType="WdtTTaskExtension">
+    select <include refid="wdtTTaskExtensionColumns"/>
+    from wdt_t_task_extension a
+    where a.task_id = #{taskId} and a.del_flag='0' and a.type = #{type}
+    order by update_date desc 
+    limit 0,1
+  </select>
+</mapper>

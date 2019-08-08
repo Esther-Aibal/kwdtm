@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskRelationDao">
+    
+    <sql id="wdtTTaskRelationColumns">
+        a.id AS "id",
+        a.task_id AS "taskId",
+        a.relation_task_id AS "relationTaskId",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag"
+    </sql>
+    
+    <sql id="wdtTTaskRelationJoins">
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskRelation">
+        SELECT 
+            <include refid="wdtTTaskRelationColumns"/>
+        FROM wdt_t_task_relation a
+        <include refid="wdtTTaskRelationJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskRelation">
+        SELECT 
+            <include refid="wdtTTaskRelationColumns"/>
+        FROM wdt_t_task_relation a
+        <include refid="wdtTTaskRelationJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="taskId != null and taskId != ''">
+                AND a.task_id = #{taskId}
+            </if>
+            <if test="relationTaskId != null and relationTaskId != ''">
+                AND a.relation_task_id = #{relationTaskId}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskRelation">
+        SELECT 
+            <include refid="wdtTTaskRelationColumns"/>
+        FROM wdt_t_task_relation a
+        <include refid="wdtTTaskRelationJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_relation(
+            id,
+            task_id,
+            relation_task_id,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag
+        ) VALUES (
+            #{id},
+            #{taskId},
+            #{relationTaskId},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_relation SET     
+            task_id = #{taskId},
+            relation_task_id = #{relationTaskId},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_relation SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    
+</mapper>

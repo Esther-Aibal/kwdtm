@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.ProjectInfoDao">
+  <resultMap id="BaseResultMap" type="com.movitech.mbox.modules.wdt.entity.ProjectInfo" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="xmlb_id" property="xmlbId" jdbcType="VARCHAR" />
+    <result column="sfqy" property="sfqy" jdbcType="CHAR" />
+    <result column="xmfzr" property="xmfzr" jdbcType="VARCHAR" />
+    <result column="fxfzr" property="fxfzr" jdbcType="VARCHAR" />
+    <result column="org_id" property="orgId" jdbcType="VARCHAR" />
+    <result column="sffb" property="sffb" jdbcType="VARCHAR" />
+    <result column="qcye" property="qcye" jdbcType="DECIMAL" />
+    <result column="cjr" property="cjr" jdbcType="VARCHAR" />
+    <result column="cjsj" property="cjsj" jdbcType="VARCHAR" />
+    <result column="xmdl" property="xmdl" jdbcType="VARCHAR" />
+    <result column="xmbh" property="xmbh" jdbcType="VARCHAR" />
+    <result column="xmzt" property="xmzt" jdbcType="VARCHAR" />
+    <result column="sfzdjk" property="sfzdjk" jdbcType="VARCHAR" />
+    <result column="jtglbm" property="jtglbm" jdbcType="VARCHAR" />
+    <result column="xmxz" property="xmxz" jdbcType="VARCHAR" />
+    <result column="xmly" property="xmly" jdbcType="VARCHAR" />
+    <result column="szd" property="szd" jdbcType="VARCHAR" />
+    <result column="tzsshy" property="tzsshy" jdbcType="VARCHAR" />
+    <result column="tzfs" property="tzfs" jdbcType="VARCHAR" />
+    <result column="ntzgm" property="ntzgm" jdbcType="DECIMAL" />
+    <result column="xzgn" property="xzgn" jdbcType="VARCHAR" />
+    <result column="gzfx" property="gzfx" jdbcType="VARCHAR" />
+    <result column="hzfstj" property="hzfstj" jdbcType="VARCHAR" />
+    <result column="ydxz" property="ydxz" jdbcType="VARCHAR" />
+    <result column="xzzdmj" property="xzzdmj" jdbcType="DECIMAL" />
+    <result column="xzjzmj" property="xzjzmj" jdbcType="DECIMAL" />
+    <result column="ghjydmj" property="ghjydmj" jdbcType="DECIMAL" />
+    <result column="ljl" property="ljl" jdbcType="DECIMAL" />
+    <result column="ghjrjzmj" property="ghjrjzmj" jdbcType="DECIMAL" />
+    <result column="tdqs" property="tdqs" jdbcType="VARCHAR" />
+    <result column="gppmsj" property="gppmsj" jdbcType="CHAR" />
+    <result column="jydj" property="jydj" jdbcType="DECIMAL" />
+    <result column="qpj" property="qpj" jdbcType="DECIMAL" />
+    <result column="cjj" property="cjj" jdbcType="DECIMAL" />
+    <result column="xmtjr" property="xmtjr" jdbcType="VARCHAR" />
+    <result column="xmtjrdh" property="xmtjrdh" jdbcType="VARCHAR" />
+    <result column="jjf" property="jjf" jdbcType="VARCHAR" />
+    <result column="jjfdh" property="jjfdh" jdbcType="VARCHAR" />
+    <result column="bz" property="bz" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, xmlb_id, sfqy, xmfzr, fxfzr, org_id, sffb, qcye, cjr, cjsj, xmdl, xmbh, 
+    xmzt, sfzdjk, jtglbm, xmxz, xmly, szd, tzsshy, tzfs, ntzgm, xzgn, gzfx, hzfstj, ydxz, 
+    xzzdmj, xzjzmj, ghjydmj, ljl, ghjrjzmj, tdqs, gppmsj, jydj, qpj, cjj, xmtjr, xmtjrdh, 
+    jjf, jjfdh, bz, update_date
+  </sql>
+  <select id="get" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from wdt_t_project_info
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <insert id="insert" parameterType="com.movitech.mbox.modules.wdt.entity.ProjectInfo" >
+    insert into wdt_t_project_info (id, name, xmlb_id,
+      sfqy, xmfzr, fxfzr, org_id, 
+      sffb, qcye, cjr, cjsj, 
+      xmdl, xmbh, xmzt, sfzdjk, 
+      jtglbm, xmxz, xmly, 
+      szd, tzsshy, tzfs, 
+      ntzgm, xzgn, gzfx, 
+      hzfstj, ydxz, xzzdmj, 
+      xzjzmj, ghjydmj, ljl, 
+      ghjrjzmj, tdqs, gppmsj, 
+      jydj, qpj, cjj, xmtjr, 
+      xmtjrdh, jjf, jjfdh, 
+      bz, update_date)
+    values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{xmlbId,jdbcType=VARCHAR}, 
+      #{sfqy,jdbcType=CHAR}, #{xmfzr,jdbcType=VARCHAR}, #{fxfzr,jdbcType=VARCHAR}, #{orgId,jdbcType=VARCHAR}, 
+      #{sffb,jdbcType=VARCHAR}, #{qcye,jdbcType=DECIMAL}, #{cjr,jdbcType=VARCHAR}, #{cjsj,jdbcType=VARCHAR}, 
+      #{xmdl,jdbcType=VARCHAR}, #{xmbh,jdbcType=VARCHAR}, #{xmzt,jdbcType=VARCHAR}, #{sfzdjk,jdbcType=VARCHAR}, 
+      #{jtglbm,jdbcType=VARCHAR}, #{xmxz,jdbcType=VARCHAR}, #{xmly,jdbcType=VARCHAR}, 
+      #{szd,jdbcType=VARCHAR}, #{tzsshy,jdbcType=VARCHAR}, #{tzfs,jdbcType=VARCHAR}, 
+      #{ntzgm,jdbcType=DECIMAL}, #{xzgn,jdbcType=VARCHAR}, #{gzfx,jdbcType=VARCHAR}, 
+      #{hzfstj,jdbcType=VARCHAR}, #{ydxz,jdbcType=VARCHAR}, #{xzzdmj,jdbcType=DECIMAL}, 
+      #{xzjzmj,jdbcType=DECIMAL}, #{ghjydmj,jdbcType=DECIMAL}, #{ljl,jdbcType=DECIMAL}, 
+      #{ghjrjzmj,jdbcType=DECIMAL}, #{tdqs,jdbcType=VARCHAR}, #{gppmsj,jdbcType=CHAR}, 
+      #{jydj,jdbcType=DECIMAL}, #{qpj,jdbcType=DECIMAL}, #{cjj,jdbcType=DECIMAL}, #{xmtjr,jdbcType=VARCHAR}, 
+      #{xmtjrdh,jdbcType=VARCHAR}, #{jjf,jdbcType=VARCHAR}, #{jjfdh,jdbcType=VARCHAR}, 
+      #{bz,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="update" parameterType="com.movitech.mbox.modules.wdt.entity.ProjectInfo" >
+    update wdt_t_project_info
+    set name = #{name,jdbcType=VARCHAR},
+      xmlb_id = #{xmlbId,jdbcType=VARCHAR},
+      sfqy = #{sfqy,jdbcType=CHAR},
+      xmfzr = #{xmfzr,jdbcType=VARCHAR},
+      fxfzr = #{fxfzr,jdbcType=VARCHAR},
+      org_id = #{orgId,jdbcType=VARCHAR},
+      sffb = #{sffb,jdbcType=VARCHAR},
+      qcye = #{qcye,jdbcType=DECIMAL},
+      cjr = #{cjr,jdbcType=VARCHAR},
+      cjsj = #{cjsj,jdbcType=VARCHAR},
+      xmdl = #{xmdl,jdbcType=VARCHAR},
+      xmbh = #{xmbh,jdbcType=VARCHAR},
+      xmzt = #{xmzt,jdbcType=VARCHAR},
+      sfzdjk = #{sfzdjk,jdbcType=VARCHAR},
+      jtglbm = #{jtglbm,jdbcType=VARCHAR},
+      xmxz = #{xmxz,jdbcType=VARCHAR},
+      xmly = #{xmly,jdbcType=VARCHAR},
+      szd = #{szd,jdbcType=VARCHAR},
+      tzsshy = #{tzsshy,jdbcType=VARCHAR},
+      tzfs = #{tzfs,jdbcType=VARCHAR},
+      ntzgm = #{ntzgm,jdbcType=DECIMAL},
+      xzgn = #{xzgn,jdbcType=VARCHAR},
+      gzfx = #{gzfx,jdbcType=VARCHAR},
+      hzfstj = #{hzfstj,jdbcType=VARCHAR},
+      ydxz = #{ydxz,jdbcType=VARCHAR},
+      xzzdmj = #{xzzdmj,jdbcType=DECIMAL},
+      xzjzmj = #{xzjzmj,jdbcType=DECIMAL},
+      ghjydmj = #{ghjydmj,jdbcType=DECIMAL},
+      ljl = #{ljl,jdbcType=DECIMAL},
+      ghjrjzmj = #{ghjrjzmj,jdbcType=DECIMAL},
+      tdqs = #{tdqs,jdbcType=VARCHAR},
+      gppmsj = #{gppmsj,jdbcType=CHAR},
+      jydj = #{jydj,jdbcType=DECIMAL},
+      qpj = #{qpj,jdbcType=DECIMAL},
+      cjj = #{cjj,jdbcType=DECIMAL},
+      xmtjr = #{xmtjr,jdbcType=VARCHAR},
+      xmtjrdh = #{xmtjrdh,jdbcType=VARCHAR},
+      jjf = #{jjf,jdbcType=VARCHAR},
+      jjfdh = #{jjfdh,jdbcType=VARCHAR},
+      bz = #{bz,jdbcType=VARCHAR},
+      update_date = #{updateDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="batchInsert" parameterType="com.movitech.mbox.modules.wdt.entity.ProjectInfo" >
+    insert into wdt_t_project_info (id, name, xmlb_id,
+    sfqy, xmfzr, fxfzr, org_id,
+    sffb, qcye, cjr, cjsj,
+    xmdl, xmbh, xmzt, sfzdjk,
+    jtglbm, xmxz, xmly,
+    szd, tzsshy, tzfs,
+    ntzgm, xzgn, gzfx,
+    hzfstj, ydxz, xzzdmj,
+    xzjzmj, ghjydmj, ljl,
+    ghjrjzmj, tdqs, gppmsj,
+    jydj, qpj, cjj, xmtjr,
+    xmtjrdh, jjf, jjfdh,
+    bz, update_date)
+    values
+    <foreach collection="list" item="item" index="index" separator="," >
+    (
+    #{item.id,jdbcType=VARCHAR}, #{item.name,jdbcType=VARCHAR}, #{item.xmlbId,jdbcType=VARCHAR},
+    #{item.sfqy,jdbcType=CHAR}, #{item.xmfzr,jdbcType=VARCHAR}, #{item.fxfzr,jdbcType=VARCHAR}, #{item.orgId,jdbcType=VARCHAR},
+    #{item.sffb,jdbcType=VARCHAR}, #{item.qcye,jdbcType=DECIMAL}, #{item.cjr,jdbcType=VARCHAR}, #{item.cjsj,jdbcType=VARCHAR},
+    #{item.xmdl,jdbcType=VARCHAR}, #{item.xmbh,jdbcType=VARCHAR}, #{item.xmzt,jdbcType=VARCHAR}, #{item.sfzdjk,jdbcType=VARCHAR},
+    #{item.jtglbm,jdbcType=VARCHAR}, #{item.xmxz,jdbcType=VARCHAR}, #{item.xmly,jdbcType=VARCHAR},
+    #{item.szd,jdbcType=VARCHAR}, #{item.tzsshy,jdbcType=VARCHAR}, #{item.tzfs,jdbcType=VARCHAR},
+    #{item.ntzgm,jdbcType=DECIMAL}, #{item.xzgn,jdbcType=VARCHAR}, #{item.gzfx,jdbcType=VARCHAR},
+    #{item.hzfstj,jdbcType=VARCHAR}, #{item.ydxz,jdbcType=VARCHAR}, #{item.xzzdmj,jdbcType=DECIMAL},
+    #{item.xzjzmj,jdbcType=DECIMAL}, #{item.ghjydmj,jdbcType=DECIMAL}, #{item.ljl,jdbcType=DECIMAL},
+    #{item.ghjrjzmj,jdbcType=DECIMAL}, #{item.tdqs,jdbcType=VARCHAR}, #{item.gppmsj,jdbcType=CHAR},
+    #{item.jydj,jdbcType=DECIMAL}, #{item.qpj,jdbcType=DECIMAL}, #{item.cjj,jdbcType=DECIMAL}, #{item.xmtjr,jdbcType=VARCHAR},
+    #{item.xmtjrdh,jdbcType=VARCHAR}, #{item.jjf,jdbcType=VARCHAR}, #{item.jjfdh,jdbcType=VARCHAR},
+    #{item.bz,jdbcType=VARCHAR}, #{item.updateDate,jdbcType=TIMESTAMP}
+    )
+    </foreach>
+  </insert>
+  <delete id="deleteAll">
+       DELETE FROM wdt_t_project_info
+  </delete>
+</mapper>

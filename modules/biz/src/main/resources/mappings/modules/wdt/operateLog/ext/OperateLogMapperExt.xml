@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.operateLog.dao.ext.OperateLogMapperExt">
+	
+	<select id="getList" resultType="com.movitech.mbox.modules.wdt.operateLog.entity.OperateLog">
+		SELECT ol.content,ol.ip_address ipAddress,ol.operator_date operatorDate,
+		u.`name` createBy  
+		from wdt_t_operate_log ol 
+		LEFT JOIN sys_user u on u.id=ol.create_by
+		where ol.task_id=#{taskId}
+		ORDER BY ol.create_date desc
+		LIMIT #{start},#{length}
+	</select>
+	
+</mapper>

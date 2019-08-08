@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTFileInfoDao">
+    
+    <sql id="wdtTFileInfoColumns">
+        a.id AS "id",
+        a.file_name AS "fileName",
+        a.file_old_name AS "fileOldName",
+        a.file_path AS "filePath",
+        a.file_size AS "fileSize",
+        a.file_type AS "fileType",
+        a.file_desc AS "fileDesc",
+        a.file_catagory_id AS "fileCatagoryId",
+        a.biz_table_name AS "bizTableName",
+        a.biz_table_pk_name AS "bizTablePkName",
+        a.biz_table_pk_value AS "bizTablePkValue",
+        a.field_name AS "fieldName",
+        a.field_token AS "fieldToken",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag"
+    </sql>
+    
+    <sql id="wdtTFileInfoJoins">
+    </sql>
+    
+    <select id="get" resultType="WdtTFileInfo">
+        SELECT 
+            <include refid="wdtTFileInfoColumns"/>
+        FROM wdt_t_file_info a
+        <include refid="wdtTFileInfoJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    <select id="getFileByPath" resultType="WdtTFileInfo">
+        SELECT
+        <include refid="wdtTFileInfoColumns"/>
+        FROM wdt_t_file_info a
+        <include refid="wdtTFileInfoJoins"/>
+        WHERE a.file_path = #{path}
+    </select>
+    <select id="findList" resultType="WdtTFileInfo">
+        SELECT 
+            <include refid="wdtTFileInfoColumns"/>
+        FROM wdt_t_file_info a
+        <include refid="wdtTFileInfoJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="fileName != null and fileName != ''">
+                AND a.file_name = #{fileName}
+            </if>
+            <if test="bizTablePkValue != null and bizTablePkValue != ''">
+                AND a.biz_table_pk_value = #{bizTablePkValue}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTFileInfo">
+        SELECT 
+            <include refid="wdtTFileInfoColumns"/>
+        FROM wdt_t_file_info a
+        <include refid="wdtTFileInfoJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_file_info(
+            id,
+            file_name,
+            file_old_name,
+            file_path,
+            file_size,
+            file_type,
+            file_desc,
+            file_catagory_id,
+            biz_table_name,
+            biz_table_pk_name,
+            biz_table_pk_value,
+            field_name,
+            field_token,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag
+        ) VALUES (
+            #{id},
+            #{fileName},
+            #{fileOldName},
+            #{filePath},
+            #{fileSize},
+            #{fileType},
+            #{fileDesc},
+            #{fileCatagoryId},
+            #{bizTableName},
+            #{bizTablePkName},
+            #{bizTablePkValue},
+            #{fieldName},
+            #{fieldToken},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_file_info SET     
+            file_name = #{fileName},
+            file_old_name = #{fileOldName},
+            file_path = #{filePath},
+            file_size = #{fileSize},
+            file_type = #{fileType},
+            file_desc = #{fileDesc},
+            file_catagory_id = #{fileCatagoryId},
+            biz_table_name = #{bizTableName},
+            biz_table_pk_name = #{bizTablePkName},
+            biz_table_pk_value = #{bizTablePkValue},
+            field_name = #{fieldName},
+            field_token = #{fieldToken},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_file_info SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    
+    <!-- Jack.Gong begin -->
+    <select id="findAllFileListForTask" resultType="WdtTFileInfo">
+        SELECT 
+            <include refid="wdtTFileInfoColumns"/>
+        FROM wdt_t_file_info a
+        <where>
+            a.biz_table_name = #{bizTableName}
+            AND
+            a.biz_table_pk_name = #{bizTablePkName}
+            AND
+            a.biz_table_pk_value = #{bizTablePkValue}
+            AND
+            a.del_flag = #{delFlag}
+        </where>        
+    </select>
+    <!-- Jack.Gong end -->
+    <update id="deleteIds" parameterType="string">
+        UPDATE wdt_t_file_info SET 
+            del_flag ='1'
+        WHERE id in 
+        <foreach collection="ids" item="item" index="index" open="(" close=")"  separator="," >
+            #{item}
+        </foreach>
+    </update>
+    
+</mapper>

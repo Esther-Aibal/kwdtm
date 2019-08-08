@@ -1,0 +1,179 @@
+.task-filter{
+    background-color: white;
+    margin: 20px 0;
+    padding: 0 50px;
+}
+.task-filter .row{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.task-filter .form-group{
+    /*text-align: center;*/
+}
+.task-filter .form-control{
+    width: 192px !important;
+    height: 28px;
+    height: 25px\9;
+    padding: 0 12px;
+    border-radius:2px;
+    display: inline-block\9;
+}
+select.form-control{
+    padding-top: 3px;
+    padding-top: 0\9;
+    padding-right: 0\9;
+    padding-bottom: 0\9;
+    display: inline-block\9;
+}
+.btn-search-task{
+    height: 28px;
+    width: 80px;
+    color: white;
+    background: #ee7701;
+    border-radius: 3px;
+    border:none;
+}
+.task-table{
+    width: 100%;
+    box-sizing: border-box;
+    background-color: white;
+    border: 1px solid #e7eaec;
+ }
+.task-table>thead>tr>th {
+    background-color: #F5F5F6;
+}
+.pagination{
+    margin: 20px 0;
+    border-radius: 4px;
+}
+.pagination a {
+    text-decoration: none;
+    border: 1px solid #d0d0d0;
+    color: #15B;
+}
+
+.pagination a, .pagination span {
+    display: inline-block;
+    padding: 6px 12px;
+    line-height: 1.4;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+}
+
+.pagination .current {
+    background: #26B;
+    color: #fff;
+    border: 1px solid #d0d0d0;
+}
+
+.pagination .current.prev, .pagination .current.next{
+    color:#999;
+    border-color:#999;
+    background:#fff;
+}
+
+/* task form*/
+.task-form .row.form-inline{
+    margin:auto;
+}
+.task-form .form-control{
+    height: 28px;
+    /*line-height: 28px;*/
+}
+
+.task-form input.form-control{
+    width: auto;
+    height: 25px\9;
+    padding: 0 12px;
+    display: inline-block;
+}
+.task-form textarea.form-control{
+    width: 100%;
+    max-width: 100%;
+    height:100px;
+}
+.task-form .form-group{
+    margin-top: 20px;
+}
+.task-form .panel-info{
+    border-color:#d2d2d2;
+}
+.task-form .panel-info>.panel-heading{
+    background: #ededed;
+    border-color:#d2d2d2;
+    color: #e70;
+    font-weight: bold;
+}
+.task-form b{
+    color: red;
+    font-weight:bold;
+}
+.filesName .btns{
+    padding: 10px;
+}
+.task-form .participant{
+    /*float:right;*/
+}
+.task-form .participant textarea{
+    height: 18%;
+    width: 400px;
+}
+.datepicker-container{
+    /*z-index: 1000 !important;*/
+}
+.form-actions{
+    text-align:center;
+}
+.form-actions .btn{
+    width: 100px;
+}
+.form-actions .btn-primary{
+    background-color: #51b052;
+    border-color: #51b052;
+}
+.form-actions .btn-warning{
+    background-color: #ee8722;
+    border-color: #ee8722;
+}
+
+/*  hacks for ie8  */
+.task-form .form-control{
+    width: auto\9;
+}
+
+.progress{
+    height: 12px;
+    position: relative;
+    top: 10px;
+}
+.progress-mini{
+    top: 0;
+}
+.progress .progress-bar{
+    background: #3cca74;
+    line-height: 1;
+    height: 12px;
+}
+.progress .progress-bar.progress-bar-danger{
+    background-color: #ed5565;
+}
+.progress .progress-bar.progress-bar-warning{
+    background-color: #f8ac59;
+}
+
+.choose-temp{
+    padding: 15px;
+}
+
+.select_item{
+    display: inline-block;
+    padding: 2px;
+    position: relative;
+    border: 1px solid #e5e6e7;
+    border-radius: 5px;
+}
+.select_item i{
+    color: red;
+    cursor: pointer;
+}

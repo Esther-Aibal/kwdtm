@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.ext.ExtWdtTTaskCommentsDao">
+	<sql id="extWdtTTaskCommentsColumns">
+        a.id AS "id",
+        a.type AS "type",
+        a.task_id AS "taskId",
+        a.task_item_id AS "taskItemId",
+        a.user_id AS "user.id",
+        a.content AS "content",
+        a.schedule AS "schedule",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        u5.name AS "user.name",
+        t.name AS "taskName"
+    </sql>
+    
+    <sql id="extWdtTTaskCommentsJoins">
+        LEFT JOIN sys_user u5 ON u5.id = a.user_id
+        LEFT JOIN wdt_t_task t ON t.id = a.task_id
+    </sql>
+
+	<select id="findList"  resultType="com.movitech.mbox.modules.wdt.entity.ext.ExtWdtTTaskComments">
+		SELECT tc.id,tc.schedule,tc.content,tc.update_date updateDate,tc.create_date AS "createDate",tc.user_id AS "user.id",
+		u.name as "user.name",o.name officeName ,tc.type
+		from wdt_t_task_comments tc
+		LEFT JOIN sys_user u on tc.user_id=u.id
+		LEFT JOIN sys_office o on u.office_id=o.id
+		<where>
+			tc.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="taskId != null and taskId != ''">
+				AND tc.task_id = #{taskId}
+			</if>
+			<if test="id != null and id != ''">
+				AND tc.id = #{id}
+			</if>
+			<if test="taskItemId != null and taskItemId != ''">
+				AND tc.task_item_id = #{taskItemId}
+			</if>
+			<if test="user != null ">
+				AND tc.user_id = #{user.id}
+			</if>
+			<if test="type != null and type != ''">
+				<choose>
+					<when test="type ==2">
+						AND tc.type in (2,4)
+					</when>
+					<otherwise>
+						AND tc.type = #{type}
+					</otherwise>
+				</choose>
+				
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY tc.update_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findPinNo"  resultType="integer" parameterType="com.movitech.mbox.modules.wdt.entity.ext.ExtWdtTTaskComments">
+		SELECT count(tc.id)+1
+		from wdt_t_task_comments tc 	
+		<where>
+			tc.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="taskId != null and taskId != ''">
+				AND tc.task_id = #{taskId}
+			</if>
+			<if test="taskItemId != null and taskItemId != ''">
+				AND tc.task_item_id = #{taskItemId}
+			</if>
+			<if test="user != null ">
+				AND tc.user_id = #{user.id}
+			</if>
+			<if test="type != null and type != ''">
+				AND tc.type = #{type}
+			</if>
+			and tc.update_date >(select min(update_date) from wdt_t_task_comments where id=#{id}) 
+		</where>
+	</select>
+
+	<select id="getCommentsTOP10" resultType="com.movitech.mbox.modules.wdt.entity.ext.ExtWdtTTaskComments">
+        SELECT 
+            <include refid="extWdtTTaskCommentsColumns"/>
+        FROM wdt_t_task_comments a
+        <include refid="extWdtTTaskCommentsJoins"/>
+        WHERE
+            a.del_flag = '0'
+            AND a.type = '0'
+        ORDER BY
+        	a.update_date DESC
+        LIMIT 10
+    </select>
+    
+    <delete id="deleteItemMessage">
+        delete from wdt_t_task_message where task_item_id=#{id} and message_type in ('1','2')
+    </delete>
+
+</mapper>

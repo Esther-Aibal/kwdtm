@@ -1,0 +1,115 @@
+.page-body .main-content{
+    padding: 20px 80px;
+}
+.panel-info>.panel-heading{
+    line-height: 20px;
+    color: #333;
+}
+.panel-info>.panel-heading>i{
+    line-height: 20px;
+    cursor: pointer;
+}
+.panel, .tabs-container {
+    margin-bottom: 10px;
+}
+.panel-body{
+    padding: 0;
+}
+.table{
+    margin-bottom: 0;
+    color: #666;
+    table-layout:fixed;
+}
+.table>tbody>tr>td,
+.table>tbody>tr>th{
+    font-size: 12px;
+    line-height:20px;
+    padding: 8px;
+}
+.table>tbody>tr>th{
+    width: 56px;
+    text-align: center;
+}
+.table>tbody tr td:first-of-type{
+    width: 650px;
+}
+.project-completion{
+    width: 200px;
+}
+.project-completion .progress{
+    width: 130px;
+    height: 12px;
+}
+.progress-mini, .progress-mini .progress-bar{
+    height: 12px;
+    line-height:1;
+    min-width: 2em;
+}
+.tabs-container .nav{
+    background:#ededed;
+    border-radius: 4px 4px 0 0;
+}
+.tabs-container .nav .pull-right{
+    padding: 0 15px 0 0;
+}
+.pull-right i {
+    font-weight:bold;
+    font-style:normal!;
+    line-height: 32px;
+}
+.project-list table{
+    border:1px solid #ededed;
+    background-color: white;
+}
+.tag-new{
+    display: inline-block;
+    width: 28px;
+    height:14px;
+    line-height:14px;
+    background: url("./img/new/label_new.png") no-repeat center;
+    vertical-align: middle;
+}
+
+.tag-unread{
+    color: #fff;
+    background-color: #F28F1A;
+    width: 50px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 15px;
+    display: inline-block;
+}
+.tag-read{
+    color: #fff;
+    background-color: #3CCA74;
+    width: 50px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+.tag-reply{
+    color: #fff;
+    background-color: #d4d4d4;
+    width: 50px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 15px;
+    display: inline-block;
+}
+.reply-content{
+    width: 260px;
+}
+.pointer,a[href],[onclick]{
+    cursor: pointer;
+}
+#todo-table thead,
+#task-table thead,
+.msg-table thead{
+    /*display: none;*/
+}
+#todo-table>tbody tr td:first-of-type,
+#todo-table>tbody tr td:first-of-type>div{
+    width: 50px;
+}

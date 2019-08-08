@@ -1,0 +1,85 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<changeSet id="20170305" author="Alex.Chen">
+		<comment>初始化数据库</comment>
+		<sqlFile path="db/init.sql" encoding="UTF-8" />
+	</changeSet>
+	<changeSet id="20170525-01" author="alex.chen">
+		<comment>用户表添加token字段</comment>
+		<addColumn tableName="sys_user">
+			<column name="token" type="varchar(64)" remarks="帐号token值" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="20170623" author="Aibal.He">
+		<comment>文章表</comment>
+		<createTable tableName="com_document" remarks="文章">
+			<column name="id" type="nvarchar(64)" remarks="GUID">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="title" type="nvarchar(200)" remarks="标题">
+				<constraints nullable="false" />
+			</column>
+			<column name="content" type="text" remarks="内容" />
+			<column name="create_by" type="nvarchar(64)" remarks="创建者" />
+			<column name="create_date" type="datetime" remarks="创建时间" />
+			<column name="update_by" type="nvarchar(64)" remarks="更新者" />
+			<column name="update_date" type="datetime" remarks="更新时间" />
+			<column name="remarks" type="nvarchar(250)" remarks="备注信息" />
+			<column name="del_flag" type="nvarchar(10)" defaultValue="0"
+				remarks="删除标记">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet id="20170623-2" author="Aibal.He">
+		<insert tableName="sys_menu">
+			<column name="id" value="4" />
+			<column name="parent_id" value="1" />
+			<column name="parent_ids" value="0,1," />
+			<column name="name" value="公用模块" />
+			<column name="sort" value="50" />
+			<column name="href" value="" />
+			<column name="permission" value="" />
+			<column name="is_show" value="1" />
+			<column name="del_flag" value="0" />
+			<column name="create_by" value="1" />
+			<column name="create_date" value="2017-05-24 15:00:00" />
+			<column name="update_by" value="1" />
+			<column name="update_date" value="2017-05-24 15:00:00" />
+		</insert>
+		<insert tableName="sys_menu">
+			<column name="id" value="41" />
+			<column name="parent_id" value="4" />
+			<column name="parent_ids" value="0,1,4," />
+			<column name="name" value="公用模块" />
+			<column name="sort" value="50" />
+			<column name="href" value="" />
+			<column name="permission" value="" />
+			<column name="is_show" value="1" />
+			<column name="del_flag" value="0" />
+			<column name="create_by" value="1" />
+			<column name="create_date" value="2017-05-24 15:00:00" />
+			<column name="update_by" value="1" />
+			<column name="update_date" value="2017-05-24 15:00:00" />
+		</insert>
+		<insert tableName="sys_menu">
+			<column name="id" value="411" />
+			<column name="parent_id" value="41" />
+			<column name="parent_ids" value="0,1,4,41," />
+			<column name="name" value="富文本框" />
+			<column name="sort" value="50" />
+			<column name="href" value="/com/comDocument" />
+			<column name="permission" value="com:comDocument:edit,com:comDocument:view" />
+			<column name="is_show" value="1" />
+			<column name="del_flag" value="0" />
+			<column name="create_by" value="1" />
+			<column name="create_date" value="2017-05-24 15:00:00" />
+			<column name="update_by" value="1" />
+			<column name="update_date" value="2017-05-24 15:00:00" />
+		</insert>
+	</changeSet>
+	
+</databaseChangeLog>

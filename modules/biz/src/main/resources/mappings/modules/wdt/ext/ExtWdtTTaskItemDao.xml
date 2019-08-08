@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.ext.ExtWdtTTaskItemDao">
+
+	<select id="getTask" resultType="com.movitech.mbox.modules.wdt.entity.WdtTTask">
+		select *,owner_id as "owner.id" from wdt_t_task where id=#{taskId} and del_flag='0'
+	</select>
+    
+    <select id="getInfo" resultType="com.movitech.mbox.modules.wdt.entity.ext.ExtWdtTTaskItem">
+	    SELECT ti.*,u2.name as owner,t.name as taskName,o.name as owerOfficeName 
+		from wdt_t_task_item ti
+		LEFT JOIN wdt_t_task t on ti.task_id=t.id
+		LEFT JOIN sys_user u2 on u2.id=ti.owner_id
+		left join sys_office o on o.id = u2.office_id
+		where ti.del_flag='0' and ti.id=#{id} LIMIT 0,1
+    </select>
+    
+    
+     <select id="findList" resultType="com.movitech.mbox.modules.wdt.entity.ext.ExtWdtTTaskItem">
+        SELECT
+         ti.id,ti.item_name as itemName,ti.start_date startDate,ti.required_completion_time requiredCompletionTime,ti.infact_completion_time as infactCompletionTime,
+         ti.progress,ti.execution_status executionStatus,
+         u2.name as owner,ti.owner_id=#{currentUser.id} istaskItemOwner
+        FROM wdt_t_task_item ti
+        LEFT JOIN sys_user u2 on u2.id=ti.owner_id
+        <where>
+            ti.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="taskId != null and taskId != ''">
+                AND ti.task_id = #{taskId}
+            </if>
+            <if test="itemName != null and itemName != ''">
+                AND ti.item_name = #{itemName}
+            </if>
+            <if test="ownerId != null and ownerId != ''">
+                AND ti.owner_id = #{ownerId}
+            </if>
+            <!--
+            AND (SELECT count(1) FROM  wdt_t_task_person p WHERE
+            (p.task_id = ti.task_id  AND p.type='0' and p.user_id=#{currentUser.id} and p.del_flag='0')
+            OR
+            (p.task_item_id = ti.id  AND p.type='1' and p.user_id=#{currentUser.id}) and p.del_flag='0') > 0
+            -->
+            AND ((SELECT count(1) FROM  wdt_t_task_person p WHERE
+                 p.task_id = ti.task_id   and p.user_id=#{currentUser.id} and p.del_flag='0') &gt; 0 
+                 <if test ="roleIds!=null">
+	                  or
+		            (select count(a.role_id) from sys_user_role a where user_id=#{currentUser.id} and role_id in (
+		            <foreach collection="roleIds" item="item" index="index" separator="," > #{item} </foreach>
+		            ))&gt;0
+                 </if>
+                 )
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY ti.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="isOwner" resultType="int">
+        SELECT COUNT(1) FROM wdt_t_task where id=#{taskId} and owner_id=#{userId}
+    </select>
+    
+    <update id="upOvertimeTaskItem">
+    	update wdt_t_task_item set execution_status = '6' 
+    	where task_id = #{taskId} and execution_status='3' 
+    	and infact_completion_time is null 
+    	<![CDATA[ and required_completion_time <NOW()  ]]>   
+    </update>
+
+	<update id="upInprogressTaskItem">
+    	update wdt_t_task_item set execution_status = '3' 
+    	where task_id = #{taskId} and execution_status='6' 
+    	and infact_completion_time is null 
+    	<![CDATA[ and required_completion_time >=NOW()  ]]>   
+    </update>
+
+
+    <update id="upTaskStatus">
+        update wdt_t_task set execution_status = #{status} 
+        where id = #{taskId}
+    </update>
+
+    <update id="upTaskItemStatus">
+        update wdt_t_task_item  set execution_status =#{status} where task_id = #{taskId}
+    </update>
+
+    <update id="upTaskSplit">
+         update wdt_t_task set is_have_split = '0' where id = #{taskId}
+    </update>
+    
+
+    <select id="getTaskItemByTaskId" resultType="WdtTTaskItem">
+        SELECT ti.*
+        from wdt_t_task_item ti
+        where ti.del_flag='0' and ti.task_id=#{taskId} and ti.execution_status in ('3','6')
+    </select>
+    
+    <select id="getItemMessage" resultType="int">
+    	select count(1) from  wdt_t_task_message 
+    	where message_type=#{type} and del_flag='0' and task_item_id=#{taskItemId}
+    </select>
+    <select id="getItemCountByTaskId" resultType="int">
+    	select count(1) from wdt_t_task_item 
+    	where task_id=#{taskId} and del_flag='0'
+    </select>
+
+</mapper>

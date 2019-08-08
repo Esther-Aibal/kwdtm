@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskSuggestDao">
+    
+    <sql id="wdtTTaskSuggestColumns">
+        a.id AS "id",
+        a.suggest AS "suggest",
+        a.input_person AS "inputPerson.id",
+        a.input_date AS "inputDate",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        u.name as "inputPerson.name",
+        a.type as "type"
+    </sql>
+    
+    <sql id="wdtTTaskSuggestJoins">
+    left join sys_user u on u.id =a.input_person
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskSuggest">
+        SELECT 
+            <include refid="wdtTTaskSuggestColumns"/>
+        FROM wdt_t_task_suggest a
+        <include refid="wdtTTaskSuggestJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskSuggest">
+        SELECT 
+            <include refid="wdtTTaskSuggestColumns"/>
+        FROM wdt_t_task_suggest a
+        <include refid="wdtTTaskSuggestJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="inputPerson != null and inputPerson.id != null and inputPerson.id != ''">
+            AND (u.login_name like 
+                    <if test="dbName == 'oracle'">'%'||#{inputPerson.id}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{inputPerson.id}+'%'</if>
+                    <if test="dbName == 'mysql'">CONCAT('%', #{inputPerson.id}, '%')</if> 
+                    
+                    or  u.name like
+	            <if test="dbName == 'oracle'">'%'||#{inputPerson.id}||'%'</if>
+	            <if test="dbName == 'mssql'">'%'+#{inputPerson.id}+'%'</if>
+	            <if test="dbName == 'mysql'">CONCAT('%', #{inputPerson.id}, '%')</if>
+	            )
+        	</if>
+			<if test="type != null and  type != ''">
+                AND a.type = #{type}
+            </if>
+            <if test="beginInputDate != null and endInputDate != null and beginInputDate != '' and endInputDate != ''">
+                AND a.input_date BETWEEN #{beginInputDate} AND #{endInputDate}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskSuggest">
+        SELECT 
+            <include refid="wdtTTaskSuggestColumns"/>
+        FROM wdt_t_task_suggest a
+        <include refid="wdtTTaskSuggestJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_suggest(
+            id,
+            suggest,
+            input_person,
+            input_date,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag,
+            type
+        ) VALUES (
+            #{id},
+            #{suggest},
+            #{inputPerson.id},
+            #{inputDate},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag},
+            #{type}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_suggest SET     
+            suggest = #{suggest},
+            input_person = #{inputPerson.id},
+            input_date = #{inputDate},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate},
+            type = #{type}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_suggest SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    
+</mapper>

@@ -1,0 +1,816 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskDao">
+    
+    <sql id="wdtTTaskColumns">
+        a.id AS "id",
+        a.theme_id AS "themeId",
+        a.name AS "name",
+        a.is_templete AS "isTemplete",
+        a.content AS "content",
+        a.target AS "target",
+        a.important_type AS "importantType",
+        a.start_date AS "startDate",
+        a.end_date AS "endDate",
+        a.infact_completion_time AS "infactCompletionTime",
+        a.fqcy AS "fqcy",
+        a.days AS "days",
+        a.owner_id AS "owner.id",
+        u1.name as "owner.name",
+        a.is_have_split AS "isHaveSplit",
+        a.is_apply_extension AS "isApplyExtension",
+        a.execution_status AS "executionStatus",
+        a.task_create_user AS "taskCreateUser.id",
+        u2.name as "taskCreateUser.name",
+        (case when a.is_have_split = 1 then a.progress else (select sum(i.progress)/count(i.progress) from wdt_t_task_item i  where i.task_id=a.id and i.del_flag='0') end) as progress,
+       (case when a.is_have_split = 1 then 1 else (select count(i.id) from wdt_t_task_item i  where i.task_id=a.id and i.del_flag='0') end )as totalCount,
+       (select count(i.id) from wdt_t_task_item i  where i.task_id=a.id and i.execution_status &gt;=7 and i.del_flag='0') as itemOverCount,
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        is_relation_task as "isRelationTask",
+        (select count(r.id) from wdt_t_task_reponse r 
+		join wdt_t_task_comments c on r.coments_id=c.id where c.task_id=a.id) as reponseCount,
+		(select c.read_count from wdt_t_task_read_count c where c.task_id=a.id) as readCount 
+		
+    </sql>
+    
+    <sql id="wdtTTaskJoins">
+     left join sys_user u1 on u1.id=a.owner_id 
+     left join sys_user u2 on u2.id=a.task_create_user 
+    </sql>
+    
+    <select id="get" resultType="WdtTTask">
+        SELECT 
+            <include refid="wdtTTaskColumns"/>,w.days as "warning.days",w.warning_start_date as "warning.warningStartDate"
+        FROM wdt_t_task a
+        <include refid="wdtTTaskJoins"/>
+        left JOIN wdt_t_warning w on w.task_id=a.id and w.del_flag='0' AND  w.status='1'
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTask">
+        SELECT 
+            <include refid="wdtTTaskColumns"/>,w.days as "warning.days",w.warning_start_date as "warning.warningStartDate"
+        FROM wdt_t_task a
+        <include refid="wdtTTaskJoins"/>
+        left JOIN wdt_t_warning w on w.task_id=a.id and w.del_flag='0' AND  w.status='1'
+        <where>
+            a.del_flag ='0'  
+            <if test="themeId != null and themeId != ''">
+                AND a.theme_id = #{themeId}
+            </if>
+            <if test="name != null and name != ''">
+                AND a.name LIKE 
+                    <if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+                    <if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+            </if>
+            <if test="content != null and content != ''">
+                AND a.content LIKE
+                <if test="dbName == 'oracle'">'%'||#{content}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{content}+'%'</if>
+                    <if test="dbName == 'mysql'">concat('%',#{content},'%')</if>
+            </if>
+            <if test="owner != null and owner.name !=null and owner.name != ''">
+                AND (u1.id like concat('%',#{owner.name},'%')  or u1.name like concat('%',#{owner.name},'%') )
+            </if>
+            <if test="owner != null and owner.office !=null and owner.office.id != null and owner.office.id != ''">
+                AND u1.office_id = #{owner.office.id}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND a.start_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND a.end_date &lt;= #{endDate}
+            </if>
+            <if test="executionStatus != null and executionStatus != ''">
+                AND a.execution_status = #{executionStatus}
+            </if>
+            	and (
+	            	(select count(p.id) from wdt_t_task_person p where p.task_id = a.id AND p.type='0' and p.user_id =#{userId})&gt;0
+	            	 <if test ="roleIds!=null">
+		                  or
+		            	(select count(a.role_id) from sys_user_role a where user_id=#{userId} and role_id in (
+		            	<foreach collection="roleIds" item="item" index="index" separator="," > #{item} </foreach>
+		            	))&gt;0 
+                 	</if>
+	            	
+            	)
+             	and (a.execution_status&gt;=1 or (a.execution_status=0 and a.create_by=#{userId}) )
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findListForChild" resultType="WdtTTask" parameterType="WdtTTask">
+        SELECT 
+            a.id AS "id",
+	        a.name AS "name",
+	        a.owner_id AS "owner.id",
+	        u1.name as "owner.name",
+	        a.start_date AS "startDate",
+        	a.end_date AS "endDate",
+        	a.content AS "content",
+	        a.execution_status AS "executionStatus",
+	        a.create_by AS "createBy.id",
+	        a.create_date AS "createDate",
+	        a.update_by AS "updateBy.id",
+	        a.update_date AS "updateDate",
+	        a.del_flag AS "delFlag"
+        FROM wdt_t_task a
+        join wdt_t_task_relation r on  r.relation_task_id =a.id and r.task_id=#{taskId}
+        left join sys_user u1 on u1.id=a.owner_id 
+        <where>
+            a.del_flag ='0'  
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTask">
+        SELECT 
+            <include refid="wdtTTaskColumns"/>
+        FROM wdt_t_task a
+        <include refid="wdtTTaskJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task(
+            id,
+            theme_id,
+            name,
+            is_templete,
+            content,
+            target,
+            important_type,
+            start_date,
+            end_date,
+            infact_completion_time,
+            fqcy,
+            days,
+            owner_id,
+            is_have_split,
+            is_apply_extension,
+            execution_status,
+            task_create_user,
+            progress,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag,
+            is_relation_task
+        ) VALUES (
+            #{id},
+            #{themeId},
+            #{name},
+            #{isTemplete},
+            #{content},
+            #{target},
+            #{importantType},
+            #{startDate},
+            #{endDate},
+            #{infactCompletionTime},
+            #{fqcy},
+            #{days},
+            #{owner.id},
+            #{isHaveSplit},
+            #{isApplyExtension},
+            #{executionStatus},
+            #{taskCreateUser.id},
+            #{progress},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag},
+            #{isRelationTask}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task SET     
+            theme_id = #{themeId},
+            name = #{name},
+            is_templete = #{isTemplete},
+            content = #{content},
+            target = #{target},
+            important_type = #{importantType},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            infact_completion_time = #{infactCompletionTime},
+            fqcy = #{fqcy},
+            days = #{days},
+            owner_id = #{owner.id},
+            is_have_split = #{isHaveSplit},
+            is_apply_extension = #{isApplyExtension},
+            execution_status = #{executionStatus},
+            task_create_user = #{taskCreateUser.id},
+            progress = #{progress},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    <update id="updatePart">
+        UPDATE wdt_t_task SET
+        	theme_id = #{themeId},     
+            name = #{name},
+            is_templete = #{isTemplete},
+            content = #{content},
+            target = #{target},
+            important_type = #{importantType},
+            end_date = #{endDate},
+            infact_completion_time = #{infactCompletionTime},
+            fqcy = #{fqcy},
+            days = #{days},
+            is_have_split = #{isHaveSplit},
+            is_apply_extension = #{isApplyExtension},
+            execution_status = #{executionStatus},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    <update id="deleteById" parameterType="string">
+        UPDATE wdt_t_task SET 
+            del_flag ='1'
+        WHERE id = #{id}
+    </update>
+    
+    <insert id="insertTaskPersons">
+        INSERT INTO wdt_t_task_person(
+	        id,
+	        type,
+            task_id,
+            task_item_id,
+            user_id,
+            org_id,
+            person_type,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag)
+        <foreach collection="allPerson" item="person" separator=" union all ">
+            SELECT 
+            #{person.id},
+            #{person.type},
+            #{person.taskId},
+            #{person.taskItemId},
+            #{person.user.id},
+            #{person.orgId},
+            #{person.personType},
+            #{person.createBy.id},
+            #{person.createDate},
+            #{person.updateBy.id},
+            #{person.updateDate},
+            '0'
+        </foreach>
+    </insert>
+    <update id="removeTaskPersonsNoType3">
+        delete from wdt_t_task_person  
+            where task_id=#{id} and person_type !='3'
+    </update>
+     <update id="removeTaskPersonsType3">
+        delete from wdt_t_task_person  
+            where task_id=#{id} and person_type ='3'
+    </update>
+    <!-- Jack.Gong begin -->
+    <sql id="wdtTTaskJoins2">
+     left join sys_user u1 on u1.id=a.owner_id 
+     left join sys_user u2 on u2.id=a.task_create_user
+     left join sys_office o1 on u1.office_id=o1.id
+     left join sys_office o2 on u2.office_id=o2.id
+    </sql>
+    
+    <select id="getTask" resultType="WdtTTask">
+        SELECT 
+            <include refid="wdtTTaskColumns"/>,w.days as "warning.days",w.warning_start_date as "warning.warningStartDate",
+            o1.name as "owner.office.name",o2.name as "taskCreateUser.office.name"
+        FROM wdt_t_task a
+        <include refid="wdtTTaskJoins2"/>
+        left JOIN wdt_t_warning w on w.task_id=a.id and w.del_flag='0' AND  w.status='1'
+        WHERE a.id = #{id}
+    </select>
+    <!-- Jack.Gong end -->
+    <select id="selectUnUsedFile" resultType="string">
+    	select a.id  from wdt_t_file_info a 
+		where a.FILE_CATAGORY_ID='0' and a.BIZ_TABLE_NAME='wdt_t_task' 
+		and a.BIZ_TABLE_PK_NAME='id' and a.BIZ_TABLE_PK_VALUE=#{id}
+		and a.FIELD_NAME='附件' 
+		and a.id not in
+		<foreach collection="fileIds" item="item" index="index" open="(" close=")"  separator="," >
+            #{item}
+        </foreach>
+    </select>
+    <update id="updateUsedFiles">
+        update wdt_t_file_info 
+        set FILE_CATAGORY_ID='0',BIZ_TABLE_NAME='wdt_t_task' ,BIZ_TABLE_PK_NAME='id',BIZ_TABLE_PK_VALUE=#{id},FIELD_NAME='附件'
+        where id in 
+        <foreach collection="fileIds" item="item" index="index" open="(" close=")"  separator="," >
+            #{item}
+        </foreach>
+    </update>
+    
+    <sql id="ByOwnerOrCreateId">
+     	SELECT DISTINCT(task.id),task.`name`, task.`end_date` endDate,task.start_date startDate, task.`task_create_user` AS
+        createUserId,task.`owner_id` ownerId,task.execution_status as executionStatus ,warning.days as "warning.days",warning.warning_start_date as "warning.warningStartDate",
+        task.important_type importantType,task.create_date taskDate,
+        (CASE WHEN task.is_have_split = 1 THEN task.progress ELSE (SELECT sum(i.progress)/count(i.progress) FROM wdt_t_task_item i WHERE i.task_id=task.id and i.del_flag='0') END) AS progress,
+        (CASE 
+				WHEN (TO_DAYS(NOW()) - TO_DAYS(task.create_date)) &gt; #{newTaskConfigDays} 
+							THEN FALSE
+						ELSE TRUE END
+			) AS isNew
+        FROM wdt_t_task task
+        LEFT JOIN wdt_t_task_person person ON person.`task_id`=task.`id` AND
+        person.`del_flag`='0'
+        LEFT JOIN wdt_t_warning warning ON warning.`task_id`=task.`id` AND warning.`del_flag`='0' AND  warning.status='1'
+        LEFT JOIN wdt_t_task_attemtion attem ON attem.`task_id`=task.`id`
+        WHERE task.`del_flag`='0'
+        <if test="ownerId!=null and ownerId!=''">
+            and task.owner_id=#{ownerId}
+        </if>
+        <if test="createId!=null and createId!=''">
+            and task.task_create_user=#{createId}
+        </if>
+        <if test="executionStatus!=null and executionStatus!=''">
+            and task.execution_status=#{executionStatus}
+        </if>
+        <if test="userId!=null and userId!=''">
+            and attem.user_id=#{userId}
+        </if>
+        <if test="joinId!=null and joinId!=''">
+            and person.user_id=#{joinId}
+        </if>
+        <if test="(createId==null || createId=='' ) and (userId==null || userId=='')">
+            and task.execution_status not in ('0', '1')
+        </if>
+        <if test="search!=null and search!=''">
+            and task.name like concat('%',#{search},'%')
+        </if>
+    </sql>
+    
+    <select id="getByOwnerOrCreateId" resultType="com.movitech.mbox.modules.wdt.entity.WdtTaskVo">
+        SELECT * from (
+        	<include refid="ByOwnerOrCreateId"/>
+        ) temp
+        ORDER by temp.taskDate desc
+    </select>
+    
+    <select id="getCountsByOwnerOrCreateId" resultType="java.lang.Integer">
+        SELECT count(*) from (
+        	<include refid="ByOwnerOrCreateId"/>
+        ) temp
+    </select>
+    
+    
+    <sql id="ByDueTask">
+    	SELECT DISTINCT(task.id),task.`name`, task.`end_date` endDate,task.start_date startDate,task.`task_create_user` AS
+        createUserId,task.`owner_id` ownerId,task.execution_status as executionStatus ,warning.days as "warning.days",warning.warning_start_date as "warning.warningStartDate",
+        task.important_type importantType,task.create_date taskDate,
+        (CASE WHEN task.is_have_split = 1 THEN task.progress ELSE (SELECT sum(i.progress)/count(i.progress) FROM wdt_t_task_item i WHERE i.task_id=task.id and i.del_flag='0') END) AS progress,
+        (CASE 
+				WHEN (TO_DAYS(NOW()) - TO_DAYS(task.create_date)) &gt; #{newTaskConfigDays} 
+							THEN FALSE
+						ELSE TRUE END
+			) AS isNew
+        FROM wdt_t_task task
+        INNER JOIN wdt_t_task_extension extension on extension.task_id=task.id and type=0 and status=1
+        LEFT JOIN wdt_t_task_person person ON person.`task_id`=task.`id` AND person.`person_type`='2' AND
+        person.`del_flag`='0'
+        LEFT JOIN wdt_t_warning warning ON warning.`task_id`=task.`id` AND warning.`del_flag`='0' and warning.status='1'
+        LEFT JOIN wdt_t_task_attemtion attem ON attem.`task_id`=task.`id`
+        WHERE task.`del_flag`='0'
+        <if test="userId!=null and userId!=''">
+            and (task.owner_id=#{userId} OR task.task_create_user=#{userId}
+            OR attem.user_id=#{userId} OR person.user_id=#{userId})
+            and task.execution_status not in ('0', '1')
+        </if>
+        <if test="search!=null and search!=''">
+            and task.name like concat('%',#{search},'%')
+        </if>
+        <if test="executionStatus!=null and executionStatus!=''">
+            and task.execution_status=#{executionStatus}
+        </if>
+    </sql>
+    
+    <!--过期任务 任务列表-->
+    <select id="getByDueTask" resultType="com.movitech.mbox.modules.wdt.entity.WdtTaskVo">
+        SELECT * FROM (
+        	<include refid="ByDueTask"/>
+        ) temp
+        ORDER by temp.taskDate desc
+    </select>
+    
+    <select id="getCountsByDueTask" resultType="java.lang.Integer">
+        SELECT count(*) from (
+        	<include refid="ByDueTask"/>
+        ) temp
+    </select>
+    
+    
+    <sql id="BySoonDueTask">
+    	SELECT DISTINCT(task.id),task.`name`, task.`end_date` endDate,task.start_date startDate,task.`task_create_user` AS
+        createUserId,task.`owner_id` ownerId,task.execution_status as executionStatus ,warning.days as "warning.days",warning.warning_start_date as "warning.warningStartDate",
+        task.important_type importantType,task.create_date taskDate,
+        (CASE WHEN task.is_have_split = 1 THEN task.progress ELSE (SELECT sum(i.progress)/count(i.progress) FROM wdt_t_task_item i WHERE i.task_id=task.id and i.del_flag='0') END) AS progress,
+        warning.`warning_start_date` AS queryTime,
+        (CASE 
+				WHEN (TO_DAYS(NOW()) - TO_DAYS(task.create_date)) &gt; #{newTaskConfigDays} 
+							THEN FALSE
+						ELSE TRUE END
+			) AS isNew
+        FROM wdt_t_task task
+        LEFT JOIN wdt_t_task_person person ON person.`task_id`=task.`id` AND person.`person_type`='2' AND
+        person.`del_flag`='0'
+        LEFT JOIN wdt_t_warning warning ON warning.`task_id`=task.`id` AND warning.`del_flag`='0' and warning.status='1'
+        LEFT JOIN wdt_t_task_attemtion attem ON attem.`task_id`=task.`id`
+        WHERE task.`del_flag`='0'
+        <if test="userId!=null and userId!=''">
+            and (task.owner_id=#{userId} OR task.task_create_user=#{userId}
+            OR attem.user_id=#{userId} OR person.user_id=#{userId})
+            AND
+            task.execution_status not in ('0', '1')
+        </if>
+        <if test="search!=null and search!=''">
+            and task.name like concat('%',#{search},'%')
+        </if>
+        <if test="executionStatus!=null and executionStatus!=''">
+            and task.execution_status=#{executionStatus}
+        </if>
+    </sql>
+    
+    <!--即将到期时间 任务列表-->
+    <select id="getBySoonDueTask" resultType="com.movitech.mbox.modules.wdt.entity.WdtTaskVo">
+        SELECT * from (
+        	<include refid="BySoonDueTask"/>
+        ) temp WHERE  temp.queryTime &lt; NOW() AND now() &lt; temp.endDate
+        ORDER by temp.taskDate desc
+    </select>
+    
+    <select id="getCountsBySoonDueTask" resultType="java.lang.Integer">
+        SELECT count(*) from (
+        	<include refid="BySoonDueTask"/>
+        ) temp WHERE  temp.queryTime &lt; NOW() AND now() &lt; temp.endDate
+    </select>
+
+    <select id="findListByExecutionStatus" resultType="WdtTTask">
+        SELECT
+        <include refid="wdtTTaskColumns"/>
+        FROM wdt_t_task a
+        <include refid="wdtTTaskJoins"/>
+        <where>
+            a.del_flag ='0'
+            <if test="executionStatuslist!=null and executionStatuslist.size()>0">
+                AND  a.execution_status in
+                <foreach collection="executionStatuslist" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="now!=null">
+                and a.end_date &lt;#{now}
+            </if>
+        </where>
+    </select>
+    <!--预警消息-->
+    <select id="getByWarningTask" resultType="WdtTTask">
+        SELECT
+        task.*,warn.`warning_start_date` as warningDate,task.`owner_id` AS `owner.id`,task.task_create_user as 'taskCreateUser.id'
+        FROM wdt_t_task task
+        INNER JOIN wdt_t_warning  warn ON warn.`task_id`=task.`id` and warn.status='1'
+        WHERE  task.`del_flag`='0'
+            AND task.`execution_status` IN  ('3','6')
+        <if test="now!=null">
+            and warn.`warning_start_date` &lt; #{now} and #{now} &lt;task.`end_date` and warn.status='1'
+        </if>
+    </select>
+    <!--查询所有消息-->
+    <select id="findMessageBytype" resultType="com.movitech.mbox.modules.wdt.entity.WdtTaskVo">
+       SELECT task.`name`,task.id,me.id as messageId,me.is_read as isRead,
+        DATE_FORMAT(me.update_date,'%Y-%m-%d') as createDate,task.important_type importantType,task.progress,me.message_type as messageType,
+        item.item_name subTitle,me.task_item_id itemId,me.pin_id as pinId ,su.name senderName,
+        (case when r.parent_id='' then su2.`name` else su1.`name` end ) as reciverName ,me.type as type,su3.name as messageReciverName ,
+        (case when (select count(p.id) from wdt_t_task_person p where p.user_id=me.reciver_id and p.task_Id=me.task_id )>0 then 0 else 1 end ) AS isParticipant
+        from wdt_t_task_message me
+        INNER  JOIN wdt_t_task task on task.id=me.task_id
+        left JOIN wdt_t_task_item item ON item.id=me.task_item_id
+        LEFT JOIN wdt_t_task_reponse r on r.id= me.pin_id
+        LEFT JOIN wdt_t_task_comments c on c.id=r.coments_id
+		LEFT JOIN sys_user  su on me.sender_id =su.id
+        LEFT JOIN sys_user su1 ON su1.`id`=r.by_user_id
+        LEFT JOIN sys_user su2 ON su2.`id`=c.user_id
+        LEFT JOIN sys_user  su3 on me.reciver_id =su3.id
+        where me.`del_flag`='0' and ( me.task_item_id is null or ( me.task_item_id is not null and item.del_flag='0')) 
+        <if test="messageTag!=null">
+        	<if test="messageTag ==0">
+	        	AND me.message_type ='0'
+	        </if>
+	         <if test="messageTag ==1">
+	        	AND me.message_type ='1' and  (item.execution_status = '3' or item.execution_status = '6') and  (task.execution_status = '3' or task.execution_status = '6')
+	        </if>
+	        <if test="messageTag ==2">
+	       		AND (me.message_type in ('0', '2', '3','5','6','7','8','10','11','12', '13','14','15','16') OR (me.message_type = '4' AND task.execution_status = '1') OR (me.message_type = '1' AND (item.execution_status = '3' or item.execution_status = '6')and  (task.execution_status = '3' or task.execution_status = '6')))
+	        </if>
+	        <if test="messageTag ==3"> 
+		        and me.message_type IN ('7','8','9','10')    
+	        </if>
+	        <if test="messageTag ==4"> 
+		        and me.message_type IN ('11','12','13','14','15','16')    
+	        </if>
+        </if>
+        
+        
+        <if test="userId!=null and userId!=''">
+            and me.reciver_id=#{userId}
+        </if>
+        order by task.update_date desc ,me.is_read asc, me.update_date desc
+    </select>
+    <select id="findUnReadMessageBytype" resultType="integer">
+       SELECT count(me.id)
+        from wdt_t_task_message me
+        INNER JOIN wdt_t_task task on task.id=me.task_id
+        left JOIN wdt_t_task_item item ON item.id=me.task_item_id
+        where me.`del_flag`='0' and ( me.task_item_id is null or ( me.task_item_id is not null and item.del_flag='0')) 
+        <if test="messageTag!=null">
+        	<if test="messageTag ==0">
+	        	AND me.message_type ='0'
+	        </if>
+	         <if test="messageTag ==1">
+	        	AND me.message_type ='1' and  (item.execution_status = '3' or item.execution_status = '6') and  (task.execution_status = '3' or task.execution_status = '6')
+	        </if>
+	        <if test="messageTag ==2">
+	       		AND (me.message_type in ('0', '2', '3','5','6','7','8','10','11','12', '13','14','15','16') OR (me.message_type = '4' AND task.execution_status = '1') OR (me.message_type = '1' AND (item.execution_status = '3' or item.execution_status = '6')and  (task.execution_status = '3' or task.execution_status = '6')))
+	        </if>
+	        <if test="messageTag ==3"> 
+		        and me.message_type IN ('7','8','9','10')    
+	        </if>
+	        <if test="messageTag ==4"> 
+		        and me.message_type IN ('11','12','13','14','15','16')    
+	        </if>
+        </if>
+        
+        
+        <if test="userId!=null and userId!=''">
+            and me.reciver_id=#{userId}
+        </if>
+        and is_read='0'
+    </select>
+    <!--查看汇报记录数量-->
+   <select id="getTaskCommentAmount" resultType="int">
+      SELECT  COUNT(1) FROM  wdt_t_task_comments s
+      WHERE s.del_flag='0' AND s.`task_item_id`=#{itemId}
+      AND s.`create_date` &gt;#{startTime} and s.`create_date` &lt;#{endTime}
+   </select>
+   <select id="getWaitingTaskForOAHome" resultType="com.movitech.mbox.modules.wdt.entity.WdtTaskVo">
+		SELECT DISTINCT task.id, task.`name` AS name, DATE_FORMAT(message.update_date,'%Y-%m-%d') AS createDate,message.update_date as mdate, task.important_type AS importantType,
+				message.message_type AS messageType,item.item_name subTitle,item.id as itemId,
+				(CASE 
+					WHEN (TO_DAYS(NOW()) - TO_DAYS(task.create_date)) &gt; #{newTaskConfigDays} 
+								THEN FALSE
+							ELSE TRUE END
+				) AS isNew,message.pin_id as pinId,message.type as "type"
+		FROM  wdt_t_task_message message
+		INNER JOIN  wdt_t_task task ON task.id = message.task_id
+		left JOIN wdt_t_task_item item ON message.`task_item_id` = item.`id`
+		WHERE message.`reciver_id` = #{userId}  and ( message.task_item_id is null or ( message.task_item_id is not null and item.del_flag='0')) 
+			AND task.del_flag = '0'
+			AND (message.message_type in ('0', '2') OR (message.message_type = '4' AND task.execution_status = '1') OR (message.message_type = '1'AND (task.execution_status = '3' or task.execution_status = '6') AND (item.execution_status = '3' or item.execution_status = '6')))
+			AND message.del_flag = '0'
+		ORDER BY mdate DESC
+	</select>
+	
+     <select id="getTaskByUserIdOrOwerId" resultType="WdtTTask">
+        SELECT
+        a.id AS "id",
+        a.theme_id AS "themeId",
+        a.name AS "name",
+        a.is_templete AS "isTemplete",
+        a.content AS "content",
+        a.target AS "target",
+        a.important_type AS "importantType",
+        a.start_date AS "startDate",
+        a.end_date AS "endDate",
+        a.infact_completion_time AS "infactCompletionTime",
+        a.fqcy AS "fqcy",
+        a.days AS "days",
+         a.task_create_user AS "taskCreateUser.id",
+        a.owner_id AS "owner.id"
+        FROM wdt_t_task a
+        <where>
+            a.del_flag='0'
+            <if test="userId!=null and userId!=''">
+               and  (a.owner_id = #{userId} OR a.task_create_user=#{userId}) and   a.execution_status='3'
+            </if>
+            <if test="id!=null and id!=''">
+              and   a.id=#{id}
+            </if>
+        </where>
+         order BY a.create_date desc
+    </select>
+    
+    <!-- 查询提醒任务的数量 -->
+    <select id="getMessageCounts" resultType="java.lang.Integer">
+       SELECT count(*)
+        from wdt_t_task_message me
+        INNER  JOIN wdt_t_task task on task.id=me.task_id
+        left JOIN wdt_t_task_item item ON me.task_item_id = item.id
+        where me.`del_flag`='0' and me.is_read='0'  and ( me.task_item_id is null or ( me.task_item_id is not null and item.del_flag='0')) 
+        <if test="userId!=null and userId!=''">
+            and me.reciver_id=#{userId}
+        </if>
+        and 
+        (
+        	me.message_type IN ('0', '2', '3','5', '6', '7','8','10','11','12','13','14','15','16')
+        	or (me.message_type = '4' AND task.execution_status = '1')
+        	or (me.message_type = '1' and (item.execution_status = '3' or item.execution_status = '6') and (task.execution_status = '3' or task.execution_status = '6'))
+        )
+    </select>
+    
+    
+    <!-- 获取子任务 -->
+    <select id="getSubTaskListByTaskIdAndStatus" resultType="WdtTTask">
+        SELECT 
+            <include refid="wdtTTaskColumns"/>
+        FROM wdt_t_task a
+        	<include refid="wdtTTaskJoins"/>
+        	JOIN wdt_t_task_relation taskRelation ON a.id = taskRelation.relation_task_id
+        WHERE taskRelation.task_id = #{id}
+        AND a.execution_status != #{executionStatus}
+    </select>
+    <select id="getByChildId" resultType="WdtTTask">
+        SELECT 
+            <include refid="wdtTTaskColumns"/>
+        FROM wdt_t_task a
+        <include refid="wdtTTaskJoins"/>
+        join wdt_t_task_relation r on r.task_id=a.id and r.relation_task_id=#{id}
+    </select>
+    <update id="batchUpdateDueStatus">
+        update wdt_t_task set execution_status=#{exestatus} WHERE id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+     <sql id="taskH5Columns">
+        a.id AS "id",
+        a.theme_id AS "themeId",
+        a.name AS "name",
+        a.is_templete AS "isTemplete",
+        a.content AS "content",
+        a.target AS "target",
+        a.important_type AS "importantType",
+        a.start_date AS "startDate",
+        a.end_date AS "endDate",
+        a.infact_completion_time AS "infactCompletionTime",
+        a.fqcy AS "fqcy",
+        a.days AS "days",
+        a.owner_id AS "owner.id",
+        u1.name as "owner.name",
+        a.is_have_split AS "isHaveSplit",
+        a.is_apply_extension AS "isApplyExtension",
+        a.execution_status AS "executionStatus",
+        a.task_create_user AS "taskCreateUser.id",
+        u2.name as "taskCreateUser.name",
+        (case when a.is_have_split = 1 then a.progress else (select sum(i.progress)/count(i.progress) from wdt_t_task_item i  where i.task_id=a.id and i.del_flag='0') end) as progress,
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        is_relation_task as "isRelationTask",
+        (case when a.is_templete = 0 then (select t.category_name from wdt_t_task_theme t where t.category_id=a.theme_id ) else '' end ) as "wdtTTaskTheme.categoryName"
+    </sql>
+    
+    <select id="findH5List" resultType="com.movitech.mbox.modules.wdt.entity.ext.TaskH5" parameterType="com.movitech.mbox.modules.wdt.entity.ext.TaskH5">
+        SELECT 
+            <include refid="taskH5Columns"/>,w.days as "warning.days",w.warning_start_date as "warning.warningStartDate"
+        FROM wdt_t_task a
+        <include refid="wdtTTaskJoins"/>
+        left JOIN wdt_t_warning w on w.task_id=a.id and w.del_flag='0' AND  w.status='1'
+        <where>
+            a.del_flag ='0'  and (select count(p.id) from wdt_t_task_person p where p.task_id = a.id AND p.type='0' and p.user_id =#{userId})&gt;0
+            <if test="name != null and name != ''">
+                AND a.name LIKE 
+                    <if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+                    <if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND a.start_date &gt;= #{startDate}
+            </if>
+            <if test="interval != null and interval != ''">
+	            <if test="interval ==1">
+	            	AND a.end_date&gt;=DATE_SUB(CURDATE(), INTERVAL 1 WEEK) and a.end_date&lt;=CURDATE()
+	            </if>
+	            <if test="interval == 2">
+	            	AND a.end_date&gt;=DATE_SUB(CURDATE(), INTERVAL 1 MONTH) and a.end_date&lt;=CURDATE()
+	            </if>
+	            <if test="interval == 3">
+	            	AND a.end_date&gt;=DATE_SUB(CURDATE(), INTERVAL 3 MONTH) and a.end_date&lt;=CURDATE()
+	            </if>
+                 <if test="interval == 4">
+	            	AND a.end_date&gt;=DATE_SUB(CURDATE(), INTERVAL 1 YEAR) and a.end_date&lt;=CURDATE()
+	            </if>
+            </if>     
+            <if test="executionStatus != null and executionStatus != ''">
+                AND a.execution_status = #{executionStatus}
+            </if>
+             and (a.execution_status&gt;=1 or (a.execution_status=0 and a.create_by=#{userId}) )
+            	
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    <!--h5代办首页代办列表-->
+    <select id="getWaitingTaskForH5" resultType="com.movitech.mbox.modules.wdt.entity.WdtTaskH5Vo">
+        SELECT  task.id, task.`name` AS name, message.create_date AS createDate, task.important_type AS importantType,
+        message.message_type AS messageType,
+        (CASE
+        WHEN (TO_DAYS(NOW()) - TO_DAYS(task.create_date)) &gt; #{newTaskConfigDays}
+        THEN FALSE
+        ELSE TRUE END
+        ) AS isNew,item.item_name subTitle,message.pin_id as pinId,message.type as "type" ,message.task_item_id as itemId 
+        FROM wdt_t_task task
+        LEFT JOIN wdt_t_task_message message ON task.id = message.task_id
+        left JOIN wdt_t_task_item item ON item.id = message.task_item_id 
+        WHERE message.`reciver_id` = #{userId} and ( message.task_item_id is null or ( message.task_item_id is not null and item.del_flag='0')) 
+        AND task.del_flag = '0'
+        AND (message.message_type in ('0', '2') OR (message.message_type = '4' AND task.execution_status = '1') OR (message.message_type = '1' AND (item.execution_status = '3' or item.execution_status = '6') AND (task.execution_status = '3' or task.execution_status = '6')))
+        AND message.del_flag = '0'
+        ORDER BY createDate DESC
+    </select>
+
+    <!--查询所有消息forH5-->
+   <!-- <select id="findMessageMapH5" resultType="map">
+        SELECT me.message_type messageType,me.task_id taskId,MAX(me.`update_date`) update_date
+        FROM wdt_t_task_message me
+        INNER  JOIN wdt_t_task task ON task.id=me.task_id
+        LEFT JOIN wdt_t_task_item item ON item.id=me.task_item_id
+        WHERE me.`del_flag`='0'
+        AND (me.message_type IN ('0', '2', '3') OR (me.message_type = '4' AND task.execution_status = '1') OR (me.message_type = '1' AND (item.execution_status != '7' AND item.execution_status != '9')))
+        AND me.reciver_id=#{userId}
+        GROUP BY   me.message_type,me.task_id  ORDER BY update_date DESC
+    </select>-->
+    <!--查询所有消息-->
+    <select id="findMessageBytypeH5" resultType="com.movitech.mbox.modules.wdt.entity.WdtTaskH5Vo">
+        SELECT task.`name`,task.id,me.id as messageId,me.is_read as isRead,
+        me.update_date as createDate,task.important_type importantType,task.progress,me.message_type as messageType,item.item_name itemName,su.name senderName
+        ,item.item_name subTitle,item.id itemId,
+        (case when r.parent_id='' then su2.`name` else su1.`name` end ) as reciverName,me.pin_id as pinId ,me.type as type
+        from wdt_t_task_message me
+        INNER  JOIN wdt_t_task task on task.id=me.task_id
+        left JOIN wdt_t_task_item item ON  item.id=me.task_item_id
+        LEFT JOIN wdt_t_task_reponse r on r.id= me.pin_id
+        LEFT JOIN wdt_t_task_comments c on c.id=r.coments_id
+		LEFT JOIN sys_user  su on me.sender_id =su.id
+        LEFT JOIN sys_user su1 ON su1.`id`=r.by_user_id
+        LEFT JOIN sys_user su2 ON su2.`id`=c.user_id
+        where me.`del_flag`='0' and ( me.task_item_id is null or ( me.task_item_id is not null and item.del_flag='0')) 
+        AND (me.message_type in ('0', '2', '3','5','6','7','8','9','10') OR (me.message_type = '4' AND task.execution_status = '1') OR (me.message_type = '1' AND (item.execution_status = '3' or item.execution_status= '6')and  (task.execution_status = '3' or task.execution_status = '6')))
+        <if test="userId!=null and userId!=''">
+            and me.reciver_id=#{userId}
+        </if>
+        order by me.is_read asc, me.update_date desc
+    </select>
+    <select id="getTaskChildCountByTaskId" resultType="int">
+    	select count(id) from wdt_t_task_relation where task_id= #{taskId}
+    </select>
+
+</mapper>

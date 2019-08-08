@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.report.DelayReportDao" >
+	<sql id="delayTaskColumns">
+        a.id AS "id",
+        a.name AS "name",
+        a.start_date AS "startDate",
+        a.end_date AS "endDate",
+        a.execution_status AS "executionStatus",
+        a.update_date AS "updateDate",
+        u.name as "ownerName",
+        o.name as officeName,
+        a.fqcy as "fqcy",
+        a.days as "days"
+    </sql>
+    <sql id="delayTaskJoins">
+    left join sys_user u on u.id=a.owner_id
+    left join sys_office o on o.id = u.office_id
+    left join wdt_t_task_theme tt on tt.id=a.theme_id 
+    </sql>
+    <sql id="delayTaskItemColumns">
+        a.id AS "id",
+        a.item_name AS "itemName",
+        a.start_date AS "startDate",
+        a.required_completion_time AS "endDate",
+        a.update_date AS "updateDate",
+        u.name as "ownerName",
+        a.execution_status as "executionStatus",
+		(select count(id) from wdt_t_item_report where item_name=a.id  and report_comment ='0') as delayCount,
+		(select count(id) from wdt_t_item_report where item_name=a.id ) as planCount
+    </sql>
+    <sql id="delayTaskItemJoins">
+    left join sys_user u on u.id=a.owner_id
+    </sql>
+    <select id="findTaskList" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTask" resultType="com.movitech.mbox.modules.wdt.entity.report.DelayTask">
+        SELECT 
+            <include refid="delayTaskColumns"/>
+        FROM wdt_t_task a
+        <include refid="delayTaskJoins"/>
+        <where>
+            a.del_flag ='0' and  (select count(i.id) from wdt_t_task_item i where i.task_id=a.id and i.start_date&lt;=#{currentDate} )&gt;0
+            <if test="name != null and name != ''">
+                AND a.name LIKE 
+                    <if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+                    <if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+                    <if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+            </if>
+            <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+                AND a.start_date &gt;= #{startDate} AND a.end_date &lt;= #{endDate}
+            </if>
+            <if test="officeId != null and officeId != ''">
+            and o.id=#{officeId}
+            </if>
+             and a.execution_status in (3,6,7,8,9,10) and a.is_have_split=0 and ((a.is_templete='0' and tt.is_total_approve='0') or a.is_templete='1')
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    <select id="getTask" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTask" resultType="com.movitech.mbox.modules.wdt.entity.report.DelayTask">
+        SELECT 
+            <include refid="delayTaskColumns"/>
+        FROM wdt_t_task a
+        <include refid="delayTaskJoins"/>
+        <where>
+            a.id = #{id}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="getTaskItemList" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTask" resultType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem">
+        SELECT 
+            <include refid="delayTaskItemColumns"/>
+        FROM wdt_t_task_item a
+        <include refid="delayTaskItemJoins"/>
+        <where>
+            a.task_id = #{id} and a.execution_status in (3,6,7,8,9,10) and a.start_date &lt;=#{currentDate}
+        </where>
+        ORDER BY a.update_date DESC
+    </select>
+    <select id="getActualCount" resultType="integer" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem">
+        select COUNT(demo.actualDate) from (select date_format(a.create_date,
+       <choose>
+            <when test="fqcy !=null and fqcy != ''">
+                <if test="fqcy == 0">'%Y-%m-%d'</if>
+                <if test="fqcy == 1">'%Y%u'</if>
+                <if test="fqcy == 2">'%Y%m'</if>
+            </when>
+            <otherwise>
+                '%Y-%m-%d'
+            </otherwise>
+        </choose> 
+        
+        ) AS actualDate
+		from wdt_t_task_comments a 
+		JOIN wdt_t_task_item i on i.id=a.task_item_id
+		where a.task_item_id=#{id} and a.create_date&gt;=i.start_date and a.type='2'
+		and ((a.create_date &lt;=#{actEndDate} and i.execution_status in (3,6))or (a.create_date &lt;=i.infact_completion_time and i.execution_status in (7,8,9,10))) 
+		GROUP BY actualDate ) demo
+    </select>
+    <select id="getOptLogList" resultType="com.movitech.mbox.modules.wdt.entity.report.OptLog" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem">
+            select a.content ,a.loge_type as logeType,a.create_date as createDate
+			from wdt_t_operate_log a 
+			where a.task_id=#{taskId}
+			and a.loge_type in ('07','03','08','54') 
+			ORDER BY a.create_date
+    </select>
+    <select id="getActualCountBySpecial" resultType="com.movitech.mbox.modules.wdt.entity.report.ActDoCompare" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem">
+		select count(A.timekey) from (select round(unix_timestamp(a.create_date)/(#{days} *24 * 60 * 60)) as timekey, count(*)
+		from wdt_t_task_comments a
+		JOIN wdt_t_task_item i on i.id=a.task_item_id
+		where a.task_item_id=#{id} and a.create_date&gt;=i.start_date and a.type='2'
+		and ((a.create_date &lt;=#{actEndDate} and i.execution_status in (3,6))or (a.create_date &lt;=i.infact_completion_time and i.execution_status in (7,8,9,10))) 
+		group by timekey order by timekey) A 
+    </select>
+    <select id="getAllIngTaskItemList" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem" resultType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem">
+        SELECT 
+       		a.id AS "id",
+       		a.start_date AS "startDate",
+			a.required_completion_time as "requiredCompletionTime",
+   			a.execution_status as "executionStatus",
+			a.task_id as "taskId",
+			t.fqcy as "fqcy",
+			t.days as "days"
+        FROM wdt_t_task_item a
+        join wdt_t_task t on t.id=a.task_id and t.execution_status in (3,6)
+        <where>
+            a.execution_status in (3,6) and a.start_date &lt;#{currentDate}
+        </where>
+    </select>
+    <select id="getActualCurrentCount" resultType="integer" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem">
+        select COUNT(a.id)
+		from wdt_t_task_comments a 
+		where a.task_item_id=#{id} and a.type='2'
+		and a.create_date &lt;#{endDate} and a.create_date&gt;=#{startDate}
+    </select>
+	<select id="getAllOverTodayTaskItemList" parameterType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem" resultType="com.movitech.mbox.modules.wdt.entity.report.DelayTaskItem">
+         SELECT 
+       		a.id AS "id",
+       		a.start_date AS "startDate",
+			a.required_completion_time as "requiredCompletionTime",
+   			a.execution_status as "executionStatus",
+			a.task_id as "taskId",
+			t.fqcy as "fqcy",
+			t.days as "days"
+        FROM wdt_t_task_item a
+		join wdt_t_task t on t.id = a.task_id
+		join wdt_t_operate_log l on a.id = l.task_item_id and l.type='1' and l.loge_type='22' and TO_DAYS(l.create_date)=TO_DAYS(#{currentDate})
+    </select>
+</mapper>

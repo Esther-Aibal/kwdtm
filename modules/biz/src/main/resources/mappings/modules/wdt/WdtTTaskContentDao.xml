@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskContentDao">
+    
+    <sql id="wdtTTaskContentColumns">
+        a.id AS "id",
+        a.task_id AS "taskId",
+        a.templete_id AS "templeteId",
+        a.content AS "content",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag"
+    </sql>
+    
+    <sql id="wdtTTaskContentJoins">
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskContent">
+        SELECT 
+            <include refid="wdtTTaskContentColumns"/>
+        FROM wdt_t_task_content a
+        <include refid="wdtTTaskContentJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskContent">
+        SELECT 
+            <include refid="wdtTTaskContentColumns"/>
+        FROM wdt_t_task_content a
+        <include refid="wdtTTaskContentJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="taskId != null and taskId != ''">
+                AND a.task_id = #{taskId}
+            </if>
+            <if test="templeteId != null and templeteId != ''">
+                AND a.templete_id = #{templeteId}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskContent">
+        SELECT 
+            <include refid="wdtTTaskContentColumns"/>
+        FROM wdt_t_task_content a
+        <include refid="wdtTTaskContentJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_content(
+            id,
+            task_id,
+            templete_id,
+            content,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag
+        ) VALUES (
+            #{id},
+            #{taskId},
+            #{templeteId},
+            #{content},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_content SET     
+            task_id = #{taskId},
+            templete_id = #{templeteId},
+            content = #{content},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_content SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    <select id="getUsedContent" resultType="WdtTTaskContent">
+        SELECT 
+            <include refid="wdtTTaskContentColumns"/>
+        FROM wdt_t_task_content a
+        <include refid="wdtTTaskContentJoins"/>
+        WHERE a.task_id=#{taskId} and a.templete_id=#{templeteId}
+    </select>
+    <delete id="deleteOld" parameterType="string">
+        delete from wdt_t_task_content
+        WHERE task_id = #{taskId}
+    </delete>
+    
+</mapper>

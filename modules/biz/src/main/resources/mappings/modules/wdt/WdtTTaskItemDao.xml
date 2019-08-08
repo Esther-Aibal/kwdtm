@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskItemDao">
+    
+    <sql id="wdtTTaskItemColumns">
+        a.id AS "id",
+        a.task_id AS "taskId",
+        a.item_name AS "itemName",
+        a.item_content AS "itemContent",
+        a.start_date AS "startDate",
+        a.required_completion_time AS "requiredCompletionTime",
+        a.progress AS "progress",
+        a.infact_completion_time AS "infactCompletionTime",
+        a.owner_id AS "ownerId",
+        a.is_apply_extension AS "isApplyExtension",
+        a.execution_status AS "executionStatus",
+        a.fqcy AS "fqcy",
+        a.days AS "days",
+        a.order_index AS "orderIndex",
+        a.operator_id AS "operatorId",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        t.name as "taskName"
+    </sql>
+    
+    <sql id="wdtTTaskItemJoins">
+     left join wdt_t_task t on t.id = a.task_id
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskItem">
+        SELECT 
+            <include refid="wdtTTaskItemColumns"/>
+        FROM wdt_t_task_item a
+        <include refid="wdtTTaskItemJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskItem">
+        SELECT 
+            <include refid="wdtTTaskItemColumns"/>,u.name owerName
+        FROM wdt_t_task_item a
+        LEFT JOIN  sys_user u on u.id=a.owner_id
+        <include refid="wdtTTaskItemJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="taskId != null and taskId != ''">
+                AND a.task_id = #{taskId}
+            </if>
+            <if test="itemName != null and itemName != ''">
+                AND a.item_name = #{itemName}
+            </if>
+            <if test="ownerId != null and ownerId != ''">
+                AND a.owner_id = #{ownerId}
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskItem">
+        SELECT 
+            <include refid="wdtTTaskItemColumns"/>
+        FROM wdt_t_task_item a
+        <include refid="wdtTTaskItemJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_item(
+            id,
+            task_id,
+            item_name,
+            item_content,
+            start_date,
+            required_completion_time,
+            progress,
+            infact_completion_time,
+            owner_id,
+            is_apply_extension,
+            execution_status,
+            fqcy,
+            days,
+            order_index,
+            operator_id,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag
+        ) VALUES (
+            #{id},
+            #{taskId},
+            #{itemName},
+            #{itemContent},
+            #{startDate},
+            #{requiredCompletionTime},
+            #{progress},
+            #{infactCompletionTime},
+            #{ownerId},
+            #{isApplyExtension},
+            #{executionStatus},
+            #{fqcy},
+            #{days},
+            #{orderIndex},
+            #{operatorId},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_item SET     
+            task_id = #{taskId},
+            item_name = #{itemName},
+            item_content = #{itemContent},
+            start_date = #{startDate},
+            required_completion_time = #{requiredCompletionTime},
+            progress = #{progress},
+            infact_completion_time = #{infactCompletionTime},
+            owner_id = #{ownerId},
+            is_apply_extension = #{isApplyExtension},
+            execution_status = #{executionStatus},
+            fqcy = #{fqcy},
+            days = #{days},
+            order_index = #{orderIndex},
+            operator_id = #{operatorId},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_item SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    
+    <select id="findUnCompletedTaskItems" resultType="WdtTTaskItem">
+        SELECT 
+            <include refid="wdtTTaskItemColumns"/>
+        FROM wdt_t_task_item a
+        <include refid="wdtTTaskItemJoins"/>
+        <where>
+            a.del_flag = #{delFlag}
+            AND
+            a.task_id = #{taskId}
+            AND
+            a.execution_status in ("3", "4") 
+        </where>        
+    </select>
+    <select id="findByConditions" resultType="WdtTTaskItem">
+        SELECT
+        *,u.name owerName
+        FROM wdt_t_task_item a
+        LEFT JOIN  sys_user u on u.id=a.owner_id
+        <include refid="wdtTTaskItemJoins"/>
+        <where>
+            a.del_flag = '0' and a.execution_status in ('3','6') and a.start_date &lt;=#{now}
+            <if test="taskId != null and taskId != ''">
+                AND a.task_id = #{taskId}
+            </if>
+            <if test="ownerId != null and ownerId != ''">
+                AND a.owner_id = #{ownerId}
+            </if>
+            <if test="list != null and list.size()>0">
+                AND a.id IN
+                <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="getOwnerIdsByTaskId" resultType="string">
+        SELECT 
+            a.owner_id
+        FROM wdt_t_task_item a
+        <where>
+            a.del_flag ='0' 
+            AND
+            a.task_id = #{taskId}
+        </where>        
+    </select>
+    
+</mapper>

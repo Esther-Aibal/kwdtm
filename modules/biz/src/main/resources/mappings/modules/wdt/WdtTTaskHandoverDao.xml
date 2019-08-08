@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movitech.mbox.modules.wdt.dao.WdtTTaskHandoverDao">
+    
+    <sql id="wdtTTaskHandoverColumns">
+        a.id AS "id",
+        a.type AS "type",
+        a.task_id AS "taskId",
+        a.task_item_id AS "taskItemId",
+        a.content AS "content",
+        a.user_id AS "userId",
+        a.create_by AS "createBy.id",
+        a.create_date AS "createDate",
+        a.update_by AS "updateBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag"
+    </sql>
+    
+    <sql id="wdtTTaskHandoverJoins">
+        LEFT JOIN sys_user u6 ON u6.id = a.user_id
+    </sql>
+    
+    <select id="get" resultType="WdtTTaskHandover">
+        SELECT 
+            <include refid="wdtTTaskHandoverColumns"/>
+        FROM wdt_t_task_handover a
+        <include refid="wdtTTaskHandoverJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findList" resultType="WdtTTaskHandover">
+        SELECT 
+            <include refid="wdtTTaskHandoverColumns"/>
+        FROM wdt_t_task_handover a
+        <include refid="wdtTTaskHandoverJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <select id="findAllList" resultType="WdtTTaskHandover">
+        SELECT 
+            <include refid="wdtTTaskHandoverColumns"/>
+        FROM wdt_t_task_handover a
+        <include refid="wdtTTaskHandoverJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>        
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO wdt_t_task_handover(
+            id,
+            type,
+            task_id,
+            task_item_id,
+            content,
+            user_id,
+            create_by,
+            create_date,
+            update_by,
+            update_date,
+            del_flag
+        ) VALUES (
+            #{id},
+            #{type},
+            #{taskId},
+            #{taskItemId},
+            #{content},
+            #{userId},
+            #{createBy.id},
+            #{createDate},
+            #{updateBy.id},
+            #{updateDate},
+            #{delFlag}
+        )
+    </insert>
+    
+    <update id="update">
+        UPDATE wdt_t_task_handover SET     
+            type = #{type},
+            task_id = #{taskId},
+            task_item_id = #{taskItemId},
+            content = #{content},
+            user_id = #{userId},
+            update_by = #{updateBy.id},
+            update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="delete">
+        UPDATE wdt_t_task_handover SET 
+            del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+    <select id="getNewHandOverByTaskId" resultType="WdtTTaskHandover" parameterType="string">
+        SELECT 
+            <include refid="wdtTTaskHandoverColumns"/>
+        FROM wdt_t_task_handover a
+        <include refid="wdtTTaskHandoverJoins"/>
+        WHERE a.task_id = #{taskId} and a.type= #{type} 
+        order by a.create_date desc
+        limit 0,1
+    </select>
+     <delete id="deleteBy">
+        delete from  wdt_t_task_handover 
+        WHERE id = #{id}
+    </delete>
+    
+</mapper>
